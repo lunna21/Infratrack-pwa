@@ -9,54 +9,101 @@ const getAuthHeaders = (): HeadersInit => {
   };
 };
 
-const handleResponse = async <T>(res: Response): Promise<T> => {
+const getStatusMessage = (status: number): string => {
+  switch (status) {
+    case 400:
+      return 'Solicitud inválida.';
+    case 401:
+      return 'No autorizado. Verifica tus credenciales.';
+    case 403:
+      return 'No tienes permisos para esta acción.';
+    case 404:
+      return 'Recurso no encontrado.';
+    case 409:
+      return 'Conflicto con el estado actual del recurso.';
+    case 422:
+      return 'Datos inválidos. Revisa el formulario.';
+    case 500:
+      return 'Error interno del servidor.';
+    default:
+      return 'Error inesperado en el servidor.';
+  }
+};
+
+const parseErrorBody = async (res: Response): Promise<string | null> => {
+  const text = await res.text().catch(() => '');
+  if (!text) return null;
+
+  try {
+    const data = JSON.parse(text) as { message?: string; error?: string; detalle?: string };
+    return data.message || data.error || data.detalle || text;
+  } catch {
+    return text;
+  }
+};
+
+const handleResponse = async <T>(res: Response, url: string): Promise<T> => {
   if (!res.ok) {
-    const err = await res.json().catch(() => ({ message: 'Error desconocido' }));
-    throw new Error(err.message || `Error ${res.status}`);
+    const bodyMessage = await parseErrorBody(res);
+    const statusMessage = getStatusMessage(res.status);
+    const detail = bodyMessage ? ` Detalle: ${bodyMessage}` : '';
+    throw new Error(`${statusMessage} (${res.status} ${res.statusText}) en ${url}.${detail}`);
   }
   return res.json();
 };
 
+const requestJson = async <T>(input: RequestInfo, init?: RequestInit): Promise<T> => {
+  try {
+    const res = await fetch(input, init);
+    return await handleResponse<T>(res, typeof input === 'string' ? input : res.url);
+  } catch (err: unknown) {
+    if (err instanceof Error) {
+      if (err.name === 'TypeError') {
+        throw new Error('Error de red. Verifica tu conexion y vuelve a intentar.');
+      }
+      throw err;
+    }
+    throw new Error('Error de red. Verifica tu conexion y vuelve a intentar.');
+  }
+};
+
 // Auth
 export const loginApi = (data: LoginRequest): Promise<LoginResponse> =>
-  fetch(`${API_BASE_URL}/auth/login`, {
+  requestJson<LoginResponse>(`${API_BASE_URL}/auth/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
-  }).then(handleResponse<LoginResponse>);
+  });
 
 // Personas
 export const crearPersonaApi = (persona: Persona): Promise<Persona> =>
-  fetch(`${API_BASE_URL}/personas`, {
+  requestJson<Persona>(`${API_BASE_URL}/personas`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(persona),
-  }).then(handleResponse<Persona>);
+  });
 
 export const getPersonasApi = (): Promise<Persona[]> =>
-  fetch(`${API_BASE_URL}/personas`, { headers: getAuthHeaders() })
-    .then(handleResponse<Persona[]>);
+  requestJson<Persona[]>(`${API_BASE_URL}/personas`, { headers: getAuthHeaders() });
 
 // Mascotas
 export const crearMascotaApi = (mascota: Mascota): Promise<Mascota> =>
-  fetch(`${API_BASE_URL}/mascotas`, {
+  requestJson<Mascota>(`${API_BASE_URL}/mascotas`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(mascota),
-  }).then(handleResponse<Mascota>);
+  });
 
 export const getMascotasApi = (): Promise<Mascota[]> =>
-  fetch(`${API_BASE_URL}/mascotas`, { headers: getAuthHeaders() })
-    .then(handleResponse<Mascota[]>);
+  requestJson<Mascota[]>(`${API_BASE_URL}/mascotas`, { headers: getAuthHeaders() });
 
 // Censos
 export const crearCensoApi = (censo: Censo): Promise<Censo> =>
-  fetch(`${API_BASE_URL}/censos`, {
+  requestJson<Censo>(`${API_BASE_URL}/censos`, {
     method: 'POST',
     headers: getAuthHeaders(),
     body: JSON.stringify(censo),
-  }).then(handleResponse<Censo>);
+  });
 
 export const getCensosApi = (): Promise<CensoDetalle[]> =>
-  fetch(`${API_BASE_URL}/censos`, { headers: getAuthHeaders() })
-    .then(handleResponse<CensoDetalle[]>);
+  requestJson<CensoDetalle[]>(`${API_BASE_URL}/censos`, { headers: getAuthHeaders() });
