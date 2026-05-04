@@ -80,7 +80,7 @@ export const RegistroPage = () => {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center w-35 h-35 bg-white-600 rounded-2xl mb-4 ">
-              <img src="../../public/icons/favicon-96x96.png" alt="Logo" className="w-30 h-30 mx-auto" />
+              <img src="/icons/favicon-96x96.png" alt="Logo" className="w-30 h-30 mx-auto" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Crear cuenta</h1>
           <p className="text-gray-500 mt-1 text-sm">Paso {step} de 2</p>

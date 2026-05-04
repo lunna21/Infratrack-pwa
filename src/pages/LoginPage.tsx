@@ -1,29 +1,33 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
-import { loginApi } from '../services/api';
-import { hashPassword } from '../utils/crypto';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { loginApi } from "../services/api";
+import { hashPassword } from "../utils/crypto";
+import logo from "../assets/logo.png";
 
 export const LoginPage = () => {
   const { login } = useAuth();
   const navigate = useNavigate();
 
-  const [form, setForm] = useState({ usuario: '', contrasena: '' });
-  const [error, setError] = useState('');
+  const [form, setForm] = useState({ usuario: "", contrasena: "" });
+  const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       const contrasenaHash = await hashPassword(form.contrasena);
-      const data = await loginApi({ usuario: form.usuario, contrasena: contrasenaHash });
+      const data = await loginApi({
+        usuario: form.usuario,
+        contrasena: contrasenaHash,
+      });
       login(data, form.usuario);
-      navigate('/dashboard');
+      navigate("/dashboard");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Credenciales inválidas');
+      setError(err instanceof Error ? err.message : "Credenciales inválidas");
     } finally {
       setLoading(false);
     }
@@ -34,11 +38,13 @@ export const LoginPage = () => {
       <div className="w-full max-w-md">
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-35 h-35 bg-white-600 rounded-2xl mb-4 ">
-              <img src="../../public/icons/favicon-96x96.png" alt="Logo" className="w-30 h-30 mx-auto" />
+          <div className="inline-flex items-center justify-center w-56 h-56 bg-white-600 rounded-2xl mb-4 ">
+            <img src={logo} alt="Logo" className="w-56 h-56 mx-auto" />
           </div>
           <h1 className="text-3xl font-bold text-gray-900">Censo Mascotas</h1>
-          <p className="text-gray-500 mt-1 text-sm">Inicia sesión para continuar</p>
+          <p className="text-gray-500 mt-1 text-sm">
+            Inicia sesión para continuar
+          </p>
         </div>
 
         {/* Card */}
@@ -59,7 +65,9 @@ export const LoginPage = () => {
                 required
                 placeholder="tu_usuario"
                 value={form.usuario}
-                onChange={e => setForm(f => ({ ...f, usuario: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, usuario: e.target.value }))
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
@@ -73,7 +81,9 @@ export const LoginPage = () => {
                 required
                 placeholder="••••••••"
                 value={form.contrasena}
-                onChange={e => setForm(f => ({ ...f, contrasena: e.target.value }))}
+                onChange={(e) =>
+                  setForm((f) => ({ ...f, contrasena: e.target.value }))
+                }
                 className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
               />
             </div>
@@ -83,14 +93,17 @@ export const LoginPage = () => {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors duration-200"
             >
-              {loading ? 'Iniciando sesión...' : 'Iniciar sesión'}
+              {loading ? "Iniciando sesión..." : "Iniciar sesión"}
             </button>
           </form>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">
-              ¿No tienes cuenta?{' '}
-              <Link to="/registro" className="text-blue-600 font-medium hover:underline">
+              ¿No tienes cuenta?{" "}
+              <Link
+                to="/registro"
+                className="text-blue-600 font-medium hover:underline"
+              >
                 Regístrate aquí
               </Link>
             </p>
