@@ -6,6 +6,7 @@ import { RegistroPage } from './pages/RegistroPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PersonaNuevaPage } from './pages/PersonaNuevaPage';
 import { MascotaNuevaPage } from './pages/MascotaNuevaPage';
+import { CensoNuevoPage } from './pages/CensoNuevoPage';
 
 function App() {
   return (
@@ -36,6 +37,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <MascotaNuevaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/censo/nuevo"
+            element={
+              <ProtectedRoute>
+                <CensoNuevoPage />
               </ProtectedRoute>
             }
           />
