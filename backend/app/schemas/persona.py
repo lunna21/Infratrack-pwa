@@ -23,8 +23,8 @@ class PersonaCreate(BaseModel):
     direccion: str
     telefono: str
     ciudad: str
-    usuario: str
-    contrasena: str
+    usuario: str | None = None
+    contrasena: str | None = None
 
     model_config = ConfigDict(
         alias_generator=_to_camel,
@@ -45,7 +45,7 @@ class PersonaResponse(BaseModel):
     direccion: str
     telefono: str
     ciudad: str
-    usuario: str
+    usuario: str | None = None
 
     model_config = ConfigDict(
         from_attributes=True,

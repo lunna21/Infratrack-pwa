@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { loginApi } from "../services/api";
 import { hashPassword } from "../utils/crypto";
+import { FormInput } from "../components/FormInput";
 import logo from "../assets/logo.png";
 
 export const LoginPage = () => {
@@ -56,37 +57,33 @@ export const LoginPage = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Usuario
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="tu_usuario"
-                value={form.usuario}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, usuario: e.target.value }))
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div>
+            <FormInput
+              label="Usuario"
+              required
+              type="text"
+              placeholder="tu_usuario"
+              value={form.usuario}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, usuario: e.target.value }))
+              }
+              pattern="^[A-Za-z0-9._-]+$"
+              title="Solo letras, numeros, punto, guion y guion bajo"
+              labelClassName="block text-sm font-medium text-gray-700 mb-1"
+              inputClassName="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Contraseña
-              </label>
-              <input
-                type="password"
-                required
-                placeholder="••••••••"
-                value={form.contrasena}
-                onChange={(e) =>
-                  setForm((f) => ({ ...f, contrasena: e.target.value }))
-                }
-                className="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-              />
-            </div>
+            <FormInput
+              label="Contraseña"
+              required
+              type="password"
+              placeholder="••••••••"
+              value={form.contrasena}
+              onChange={(e) =>
+                setForm((f) => ({ ...f, contrasena: e.target.value }))
+              }
+              labelClassName="block text-sm font-medium text-gray-700 mb-1"
+              inputClassName="w-full px-4 py-2.5 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+            />
 
             <button
               type="submit"

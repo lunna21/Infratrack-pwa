@@ -4,6 +4,8 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { LoginPage } from './pages/LoginPage';
 import { RegistroPage } from './pages/RegistroPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { PersonaNuevaPage } from './pages/PersonaNuevaPage';
+import { MascotaNuevaPage } from './pages/MascotaNuevaPage';
 
 function App() {
   return (
@@ -16,9 +18,25 @@ function App() {
           <Route
             path="/dashboard"
             element={
-              // <ProtectedRoute>
+              <ProtectedRoute>
                 <DashboardPage />
-              // </ProtectedRoute>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/personas/nueva"
+            element={
+              <ProtectedRoute>
+                <PersonaNuevaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mascotas/nueva"
+            element={
+              <ProtectedRoute>
+                <MascotaNuevaPage />
+              </ProtectedRoute>
             }
           />
           {/* Próximas rutas (las iremos agregando) */}

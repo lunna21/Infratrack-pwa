@@ -27,10 +27,18 @@ def crear_persona(body: PersonaCreate, db: Session = Depends(get_db)):
     - Hashea la contraseña con bcrypt antes de guardar.
     - No requiere autenticación (registro público).
     """
-    # Verificar duplicados por documento o usuario
-    existe = db.query(Persona).filter(
-        (Persona.documento == body.documento) | (Persona.usuario == body.usuario)
-    ).first()
+    # Validar credenciales si se va a crear usuario
+    if (body.usuario and not body.contrasena) or (body.contrasena and not body.usuario):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuario y contrasena deben venir juntos.",
+        )
+
+    # Verificar duplicados por documento y usuario (si aplica)
+    existe = db.query(Persona).filter(Persona.documento == body.documento).first()
+    if body.usuario:
+        existe_usuario = db.query(Persona).filter(Persona.usuario == body.usuario).first()
+        existe = existe or existe_usuario
 
     if existe:
         raise HTTPException(
@@ -48,7 +56,7 @@ def crear_persona(body: PersonaCreate, db: Session = Depends(get_db)):
         telefono=body.telefono,
         ciudad=body.ciudad,
         usuario=body.usuario,
-        contrasena=hash_password(body.contrasena),
+        contrasena=hash_password(body.contrasena) if body.contrasena else None,
     )
 
     db.add(persona)

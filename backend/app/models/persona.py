@@ -24,8 +24,8 @@ class Persona(Base):
     direccion = Column(String(250), nullable=False)
     telefono = Column(String(20), nullable=False)
     ciudad = Column(String(100), nullable=False)
-    usuario = Column(String(80), nullable=False, unique=True)
-    contrasena = Column(String(255), nullable=False)
+    usuario = Column(String(80), nullable=True, unique=True)
+    contrasena = Column(String(255), nullable=True)
 
     # Relación inversa con Censo
     censos = relationship("Censo", back_populates="dueno")

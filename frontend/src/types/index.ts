@@ -7,7 +7,7 @@ export interface Persona {
   direccion: string;
   telefono: string;
   ciudad: string;
-  usuario: string;
+  usuario?: string | null;
   contrasena?: string;
 }
 

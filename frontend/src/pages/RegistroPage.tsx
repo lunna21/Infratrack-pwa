@@ -3,6 +3,8 @@ import { useNavigate, Link } from 'react-router-dom';
 import { crearPersonaApi } from '../services/api';
 import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../utils/crypto';
+import { FormInput } from '../components/FormInput';
+import { FormSelect } from '../components/FormSelect';
 
 const TIPOS_DOCUMENTO = ['CC', 'CE', 'Pasaporte', 'TI', 'NIT'];
 
@@ -107,83 +109,76 @@ export const RegistroPage = () => {
               <h2 className="font-semibold text-gray-800 mb-4">Datos personales</h2>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Nombres *</label>
-                  <input
-                    required
-                    value={form.nombres}
-                    onChange={e => set('nombres', e.target.value)}
-                    placeholder="Juan Andrés"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Apellidos *</label>
-                  <input
-                    required
-                    value={form.apellidos}
-                    onChange={e => set('apellidos', e.target.value)}
-                    placeholder="Pérez Gómez"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Tipo documento *</label>
-                  <select
-                    value={form.tipoDocumento}
-                    onChange={e => set('tipoDocumento', e.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {TIPOS_DOCUMENTO.map(t => <option key={t}>{t}</option>)}
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Número documento *</label>
-                  <input
-                    required
-                    value={form.documento}
-                    onChange={e => set('documento', e.target.value)}
-                    placeholder="1000200300"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Dirección *</label>
-                <input
+                <FormInput
+                  label="Nombres"
                   required
-                  value={form.direccion}
-                  onChange={e => set('direccion', e.target.value)}
-                  placeholder="Calle 1 # 2-3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  value={form.nombres}
+                  onChange={e => set('nombres', e.target.value)}
+                  placeholder="Juan Andres"
+                  pattern="^[A-Za-z ]+$"
+                  title="Solo letras y espacios"
+                />
+                <FormInput
+                  label="Apellidos"
+                  required
+                  value={form.apellidos}
+                  onChange={e => set('apellidos', e.target.value)}
+                  placeholder="Perez Gomez"
+                  pattern="^[A-Za-z ]+$"
+                  title="Solo letras y espacios"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Teléfono *</label>
-                  <input
-                    required
-                    value={form.telefono}
-                    onChange={e => set('telefono', e.target.value)}
-                    placeholder="3001234567"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium text-gray-700 mb-1">Ciudad *</label>
-                  <input
-                    required
-                    value={form.ciudad}
-                    onChange={e => set('ciudad', e.target.value)}
-                    placeholder="Tunja"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+                <FormSelect
+                  label="Tipo documento"
+                  required
+                  value={form.tipoDocumento}
+                  onChange={e => set('tipoDocumento', e.target.value)}
+                  options={TIPOS_DOCUMENTO.map(t => ({ value: t }))}
+                />
+                <FormInput
+                  label="Numero documento"
+                  required
+                  value={form.documento}
+                  onChange={e => set('documento', e.target.value)}
+                  placeholder="1000200300"
+                  inputMode="numeric"
+                  pattern="^[0-9]+$"
+                  title="Solo numeros"
+                />
+              </div>
+
+              <FormInput
+                label="Direccion"
+                required
+                value={form.direccion}
+                onChange={e => set('direccion', e.target.value)}
+                placeholder="Calle 1 # 2-3"
+                pattern="^[A-Za-z0-9 #.-]+$"
+                title="Letras, numeros y caracteres # . -"
+              />
+
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput
+                  label="Telefono"
+                  required
+                  value={form.telefono}
+                  onChange={e => set('telefono', e.target.value)}
+                  placeholder="3001234567"
+                  inputMode="numeric"
+                  pattern="^[0-9]+$"
+                  title="Solo numeros"
+                />
+                <FormInput
+                  label="Ciudad"
+                  required
+                  value={form.ciudad}
+                  onChange={e => set('ciudad', e.target.value)}
+                  placeholder="Tunja"
+                  pattern="^[A-Za-z ]+$"
+                  title="Solo letras y espacios"
+                />
               </div>
 
               <button
@@ -200,40 +195,33 @@ export const RegistroPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <h2 className="font-semibold text-gray-800 mb-4">Credenciales de acceso</h2>
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Usuario *</label>
-                <input
-                  required
-                  value={form.usuario}
-                  onChange={e => set('usuario', e.target.value)}
-                  placeholder="mi_usuario"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <FormInput
+                label="Usuario"
+                required
+                value={form.usuario}
+                onChange={e => set('usuario', e.target.value)}
+                placeholder="mi_usuario"
+                pattern="^[A-Za-z0-9._-]+$"
+                title="Solo letras, numeros, punto, guion y guion bajo"
+              />
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Contraseña *</label>
-                <input
-                  type="password"
-                  required
-                  value={form.contrasena}
-                  onChange={e => set('contrasena', e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <FormInput
+                label="Contrasena"
+                required
+                type="password"
+                value={form.contrasena}
+                onChange={e => set('contrasena', e.target.value)}
+                placeholder="Minimo 6 caracteres"
+              />
 
-              <div>
-                <label className="block text-xs font-medium text-gray-700 mb-1">Confirmar contraseña *</label>
-                <input
-                  type="password"
-                  required
-                  value={form.confirmarContrasena}
-                  onChange={e => set('confirmarContrasena', e.target.value)}
-                  placeholder="Repite la contraseña"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+              <FormInput
+                label="Confirmar contrasena"
+                required
+                type="password"
+                value={form.confirmarContrasena}
+                onChange={e => set('confirmarContrasena', e.target.value)}
+                placeholder="Repite la contrasena"
+              />
 
               <div className="flex gap-3 mt-2">
                 <button
