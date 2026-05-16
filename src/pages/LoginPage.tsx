@@ -37,7 +37,10 @@ export const LoginPage = () => {
     <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden">
       {/* Elementos decorativos de fondo */}
       <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-indigo-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
-      <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse" style={{ animationDelay: '2s' }}></div>
+      <div
+        className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-blue-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
+        style={{ animationDelay: "2s" }}
+      ></div>
 
       <div className="w-full max-w-md relative z-10 animate-slide-up">
         {/* Logo / Header */}
@@ -45,7 +48,9 @@ export const LoginPage = () => {
           <div className="w-24 h-24 bg-white/80 backdrop-blur-xl rounded-3xl shadow-xl shadow-indigo-100 border border-white/50 flex items-center justify-center mb-6 transform hover:scale-105 transition-transform duration-300">
             <img src={logo} alt="Logo" className="w-16 h-16 object-contain" />
           </div>
-          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">Bienvenido de nuevo</h1>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            Bienvenido de nuevo
+          </h1>
           <p className="text-slate-500 mt-2 text-sm font-medium">
             Ingresa tus credenciales para continuar
           </p>
@@ -103,7 +108,9 @@ export const LoginPage = () => {
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
                   Iniciando sesión...
                 </span>
-              ) : "Ingresar a mi cuenta"}
+              ) : (
+                "Ingresar a mi cuenta"
+              )}
             </button>
           </form>
 
