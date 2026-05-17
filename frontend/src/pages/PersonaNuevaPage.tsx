@@ -8,7 +8,7 @@ import { FormSelect } from '../components/FormSelect';
 
 const TIPOS_DOCUMENTO = ['CC', 'CE', 'Pasaporte', 'TI', 'NIT'];
 const TIPOS_PERSONA = [
-  { value: 'DUENO', label: 'Dueno' },
+  { value: 'DUENO', label: 'Dueño' },
   { value: 'USUARIO', label: 'Usuario' },
 ];
 
@@ -64,7 +64,7 @@ export const PersonaNuevaPage = () => {
         ...rest,
         id: uuidv4(),
         usuario: tipoPersona === 'USUARIO' ? rest.usuario : null,
-        contrasena: tipoPersona === 'USUARIO' ? contrasenaHash : null,
+        contrasena: tipoPersona === 'USUARIO' ? contrasenaHash : undefined,
       });
       setSuccess(true);
       setTimeout(() => navigate('/dashboard'), 1500);
@@ -77,8 +77,10 @@ export const PersonaNuevaPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+        {/* Decors */}
+        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full relative z-10">
           <div className="text-5xl mb-4">✅</div>
           <h2 className="text-xl font-bold text-gray-900">Persona registrada</h2>
           <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
@@ -88,8 +90,11 @@ export const PersonaNuevaPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-xl">
+    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Decors */}
+      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+      
+      <div className="w-full max-w-xl relative z-10 animate-slide-up">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Registrar persona</h1>
           <p className="text-gray-500 mt-1 text-sm">Completa la informacion del usuario</p>

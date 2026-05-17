@@ -5,31 +5,33 @@ import { v4 as uuidv4 } from 'uuid';
 import { hashPassword } from '../utils/crypto';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
+import { AnimalFootPrint } from "../components/AnimalFootPrint";
 
-const TIPOS_DOCUMENTO = ['CC', 'CE', 'Pasaporte', 'TI', 'NIT'];
+
+const TIPOS_DOCUMENTO = ["CC", "CE", "Pasaporte", "TI", "NIT"];
 
 export const RegistroPage = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
 
   const [form, setForm] = useState({
-    nombres: '',
-    apellidos: '',
-    tipoDocumento: 'CC',
-    documento: '',
-    direccion: '',
-    telefono: '',
-    ciudad: '',
-    usuario: '',
-    contrasena: '',
-    confirmarContrasena: '',
+    nombres: "",
+    apellidos: "",
+    tipoDocumento: "CC",
+    documento: "",
+    direccion: "",
+    telefono: "",
+    ciudad: "",
+    usuario: "",
+    contrasena: "",
+    confirmarContrasena: "",
   });
 
   const set = (field: string, value: string) =>
-    setForm(f => ({ ...f, [field]: value }));
+    setForm((f) => ({ ...f, [field]: value }));
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,14 +40,14 @@ export const RegistroPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
     if (form.contrasena !== form.confirmarContrasena) {
-      setError('Las contraseñas no coinciden');
+      setError("Las contraseñas no coinciden");
       return;
     }
     if (form.contrasena.length < 6) {
-      setError('La contraseña debe tener al menos 6 caracteres');
+      setError("La contraseña debe tener al menos 6 caracteres");
       return;
     }
 
@@ -54,11 +56,17 @@ export const RegistroPage = () => {
       const { confirmarContrasena, contrasena, ...rest } = form;
       void confirmarContrasena;
       const contrasenaHash = await hashPassword(contrasena);
-      await crearPersonaApi({ ...rest, id: uuidv4(), contrasena: contrasenaHash });
+      await crearPersonaApi({
+        ...rest,
+        id: uuidv4(),
+        contrasena: contrasenaHash,
+      });
       setSuccess(true);
-      setTimeout(() => navigate('/login'), 2000);
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : 'Error al registrar usuario');
+      setError(
+        err instanceof Error ? err.message : "Error al registrar usuario",
+      );
     } finally {
       setLoading(false);
     }
@@ -67,46 +75,72 @@ export const RegistroPage = () => {
   if (success) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-xl font-bold text-gray-900">¡Registro exitoso!</h2>
-          <p className="text-gray-500 text-sm mt-2">Redirigiendo al login...</p>
+        <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-10 text-center max-w-sm w-full border border-white/50 animate-slide-up">
+          <div className="text-6xl mb-6 bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-inner">
+            ✓
+          </div>
+          <h2 className="text-2xl font-bold text-slate-800">
+            ¡Registro exitoso!
+          </h2>
+          <p className="text-slate-500 font-medium mt-3">
+            Preparando tu entorno, redirigiendo al login...
+          </p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-blue-50 py-10 px-4 relative overflow-hidden flex items-center justify-center">
+      {/* Elementos decorativos */}
+      <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+            <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
+
+      <div
+        className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
+        style={{ animationDelay: "1.5s" }}
+      ></div>
+
+      <div className="w-full max-w-lg relative z-10 animate-slide-up">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-35 h-35 bg-white-600 rounded-2xl mb-4 ">
-              <img src="/icons/favicon-96x96.png" alt="Logo" className="w-30 h-30 mx-auto" />
+        <div className="text-center mb-8 flex flex-col items-center">
+          <div className="w-20 h-20 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 flex items-center justify-center mb-5">
+            <img
+              src="/icons/favicon-96x96.png"
+              alt="Logo"
+              className="w-12 h-12 object-contain"
+            />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900">Crear cuenta</h1>
-          <p className="text-gray-500 mt-1 text-sm">Paso {step} de 2</p>
+          <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+            Crea tu cuenta
+          </h1>
+          <p className="text-indigo-600 mt-2 font-semibold">
+            Paso {step} <span className="text-slate-400 font-medium">de 2</span>
+          </p>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-gray-200 rounded-full h-1.5 mb-6">
+        <div className="w-full bg-slate-200/50 rounded-full h-2.5 mb-8 overflow-hidden backdrop-blur-sm border border-white/40 shadow-inner">
           <div
-            className="bg-blue-600 h-1.5 rounded-full transition-all duration-500"
-            style={{ width: step === 1 ? '50%' : '100%' }}
+            className="bg-gradient-to-r from-indigo-500 to-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+            style={{ width: step === 1 ? "50%" : "100%" }}
           />
         </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-100/50 border border-white/60 p-8 sm:p-10">
           {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+            <div className="mb-6 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2">
+              <span className="text-red-500">⚠️</span>
               {error}
             </div>
           )}
 
           {/* Step 1: Datos personales */}
           {step === 1 && (
-            <form onSubmit={handleNext} className="space-y-4">
-              <h2 className="font-semibold text-gray-800 mb-4">Datos personales</h2>
+            <form onSubmit={handleNext} className="space-y-5 animate-fade-in">
+              <h2 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-3 mb-5">
+                Información Personal
+              </h2>
 
               <div className="grid grid-cols-2 gap-3">
                 <FormInput
@@ -181,19 +215,23 @@ export const RegistroPage = () => {
                 />
               </div>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors mt-2"
-              >
-                Continuar →
-              </button>
+              <div className="pt-4">
+                <button
+                  type="submit"
+                  className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-500/25 transform hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
+                >
+                  Continuar al paso final
+                </button>
+              </div>
             </form>
           )}
 
           {/* Step 2: Credenciales */}
           {step === 2 && (
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <h2 className="font-semibold text-gray-800 mb-4">Credenciales de acceso</h2>
+            <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
+              <h2 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-3 mb-5">
+                Seguridad de la Cuenta
+              </h2>
 
               <FormInput
                 label="Usuario"
@@ -223,30 +261,40 @@ export const RegistroPage = () => {
                 placeholder="Repite la contrasena"
               />
 
-              <div className="flex gap-3 mt-2">
+              <div className="flex gap-4 pt-4">
                 <button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  className="flex-1 bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl text-sm transition-colors active:scale-[0.98]"
                 >
-                  ← Atrás
+                  Volver
                 </button>
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition-all"
                 >
-                  {loading ? 'Registrando...' : 'Registrarme'}
+                  {loading ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      Creando...
+                    </span>
+                  ) : (
+                    "Finalizar"
+                  )}
                 </button>
               </div>
             </form>
           )}
 
-          <div className="mt-6 text-center">
-            <p className="text-sm text-gray-500">
-              ¿Ya tienes cuenta?{' '}
-              <Link to="/login" className="text-blue-600 font-medium hover:underline">
-                Inicia sesión
+          <div className="mt-8 text-center bg-slate-50/50 p-4 rounded-xl">
+            <p className="text-sm font-medium text-slate-500">
+              ¿Ya tienes una cuenta?{" "}
+              <Link
+                to="/login"
+                className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors"
+              >
+                Inicia sesión aquí
               </Link>
             </p>
           </div>
