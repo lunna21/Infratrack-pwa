@@ -106,11 +106,7 @@ export const RegistroPage = () => {
         {/* Header */}
         <div className="text-center mb-2.5 flex flex-col items-center">
           <div className="w-40 h-40  flex items-center justify-center">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-40 h-40 object-contain"
-            />
+            <img src={logo} alt="Logo" className="w-40 h-40 object-contain" />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
             Crea tu cuenta
