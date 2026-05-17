@@ -4,8 +4,8 @@ import type { AuthContextType, LoginResponse } from '../types';
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [token, setToken] = useState<string | null>(null);
-  const [usuario, setUsuario] = useState<string | null>(null);
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('jwt_token'));
+  const [usuario, setUsuario] = useState<string | null>(() => localStorage.getItem('jwt_usuario'));
 
   useEffect(() => {
     const storedToken = localStorage.getItem('jwt_token');

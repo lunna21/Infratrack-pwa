@@ -251,7 +251,7 @@ export const CensoNuevoPage = () => {
         id: uuidv4(),
         idMascota: form.idMascota,
         idDueno: form.idDueno,
-        fotografia: form.fotografia || null,
+        fotografia: form.fotografia,
         lat: latNumber,
         lon: lonNumber,
         idProyecto: PROYECTO_DEFAULT,
