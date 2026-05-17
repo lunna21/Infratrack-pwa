@@ -124,7 +124,7 @@ export const LoginPage = () => {
 
           {/* Caja de texto inferior (Efecto Glassmorphism refinado) */}
           <div className="glass-panel">
-            <h2 className="text-4xl font-black text-brand-dark mb-4 tracking-tight">
+            <h2 className="text-4xl font-black text-brand-secondary mb-4 tracking-tight">
               Censo de Mascotas
             </h2>
             <p className="text-brand-dark-muted text-lg font-semibold leading-relaxed max-w-lg mx-auto">

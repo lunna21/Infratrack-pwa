@@ -6,6 +6,8 @@ import type { Mascota, Persona } from "../types";
 import { FormInput } from "../components/FormInput";
 import { FormSelect } from "../components/FormSelect";
 import { Navbar } from "../components/Navbar";
+import { Button } from "../components/Button";
+import { AnimalFootPrint } from "../components/AnimalFootPrint";
 
 const COLOR_DEFAULT = "#B0F0FF";
 const PROYECTO_DEFAULT = "PROPWA_004";
@@ -231,7 +233,7 @@ export const CensoNuevoPage = () => {
 
   const duenoOptions = useMemo(
     () => [
-      { value: "", label: "Selecciona un dueno" },
+      { value: "", label: "Selecciona un dueño" },
       ...personas.map((p) => ({
         value: p.id,
         label: `${p.nombres} ${p.apellidos}`.trim(),
@@ -257,7 +259,7 @@ export const CensoNuevoPage = () => {
     }
 
     if (!form.idMascota || !form.idDueno) {
-      setError("Debes seleccionar una mascota y un dueno");
+      setError("Debes seleccionar una mascota y un dueño");
       return;
     }
 
@@ -284,15 +286,23 @@ export const CensoNuevoPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+      <div className="login-wrapper relative flex flex-col">
+        {/* Elementos decorativos */}
+        <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+        <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
         <Navbar />
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
-            <div className="text-5xl mb-4">📋</div>
-            <h2 className="text-xl font-bold text-gray-900">
+
+        <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-10 text-center max-w-sm w-full border border-white/50 animate-slide-up">
+            <div className="text-6xl mb-6 bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-inner">
+              📋
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800">
               Censo registrado
             </h2>
-            <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
+            <p className="text-slate-500 font-medium mt-3">
+              Volviendo al panel...
+            </p>
           </div>
         </main>
       </div>
@@ -300,25 +310,37 @@ export const CensoNuevoPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+    <div className="login-wrapper relative flex flex-col">
+      {/* Elementos decorativos */}
+      <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+      <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
+
+      <div
+        className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
+        style={{ animationDelay: "1.5s" }}
+      ></div>
+
       <Navbar />
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-xl">
+      <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
+        <div className="w-full max-w-xl relative z-10 animate-slide-up">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Nuevo censo</h1>
-            <p className="text-gray-500 mt-1 text-sm">
-              Asocia mascota y dueno existentes
+            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+              Nuevo censo
+            </h1>
+            <p className="text-brand-primary mt-1 font-semibold">
+              Asocia mascota y dueño existentes
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-100/50 border border-white/60 p-8 sm:p-10">
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              <div className="mb-6 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2">
+                <span className="text-red-500">⚠️</span>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
               <FormSelect
                 label="Mascota"
                 required
@@ -365,18 +387,18 @@ export const CensoNuevoPage = () => {
                   <div className="rounded-lg border border-gray-200 p-3">
                     <div className="flex flex-wrap gap-2">
                       {!cameraActive && (
-                        <button
+                        <Button
                           type="button"
+                          variant="primary"
                           onClick={() =>
                             startCamera(
                               facingMode,
                               selectedDeviceId || undefined,
                             )
                           }
-                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
                         >
                           Activar camara
-                        </button>
+                        </Button>
                       )}
                       {videoDevices.length > 1 && (
                         <FormSelect
@@ -416,20 +438,20 @@ export const CensoNuevoPage = () => {
                           className="w-full rounded-lg border border-gray-200"
                         />
                         <div className="flex gap-2">
-                          <button
+                          <Button
                             type="button"
+                            variant="primary"
                             onClick={capturePhoto}
-                            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
                           >
                             Tomar foto
-                          </button>
-                          <button
+                          </Button>
+                          <Button
                             type="button"
+                            variant="outline"
                             onClick={stopCamera}
-                            className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
                           >
                             Cancelar
-                          </button>
+                          </Button>
                         </div>
                       </div>
                     )}
@@ -465,21 +487,23 @@ export const CensoNuevoPage = () => {
                 )}
               </div>
 
-              <div className="flex gap-3 pt-2">
-                <button
+              <div className="flex gap-4 pt-4">
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  fullWidth
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  fullWidth
                 >
                   {loading ? "Guardando..." : "Registrar"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

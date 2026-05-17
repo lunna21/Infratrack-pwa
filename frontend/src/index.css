@@ -34,7 +34,7 @@
     @apply w-full max-w-5xl relative z-10 flex flex-col md:flex-row bg-white rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden min-h-[75vh];
   }
   .login-banner {
-    @apply hidden md:flex md:w-1/2 relative bg-gradient-to-br from-[#e0f7fa] via-[#d7f2f5] to-[#a1e2ea] items-center justify-center overflow-hidden p-10 flex-col;
+    @apply hidden md:flex md:w-1/2 relative bg-gradient-to-br from-[#ffffff] via-[#97e1ea] to-[#ffffff] items-center justify-center overflow-hidden p-10 flex-col;
   }
   
   /* Elementos de formulario */

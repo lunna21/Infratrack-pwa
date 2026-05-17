@@ -181,7 +181,7 @@ export const RegistroPage = () => {
               </div>
 
               <FormInput
-                label="Direccion"
+                label="Dirección"
                 required
                 value={form.direccion}
                 onChange={(e) => set("direccion", e.target.value)}

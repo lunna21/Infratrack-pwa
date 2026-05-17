@@ -1,11 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { v4 as uuidv4 } from "uuid";
 import { crearPersonaApi } from "../services/api";
 import { hashPassword } from "../utils/crypto";
 import { FormInput } from "../components/FormInput";
 import { FormSelect } from "../components/FormSelect";
 import { Navbar } from "../components/Navbar";
+import { Button } from "../components/Button";
+import { AnimalFootPrint } from "../components/AnimalFootPrint";
 
 const TIPOS_DOCUMENTO = ["CC", "CE", "Pasaporte", "TI", "NIT"];
 const TIPOS_PERSONA = [
@@ -80,19 +82,29 @@ export const PersonaNuevaPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
-        {/* Decors */}
-        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 border border-[#b2ddf7]"></div>
+      <div className="login-wrapper relative flex flex-col">
+        {/* Elementos decorativos */}
+        <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+        <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
+
+        <div
+          className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
+          style={{ animationDelay: "1.5s" }}
+        ></div>
 
         <Navbar />
 
-        <main className="flex-1 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full relative z-10">
-            <div className="text-5xl mb-4">✅</div>
-            <h2 className="text-xl font-bold text-gray-900">
+        <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
+          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-10 text-center max-w-sm w-full border border-white/50 animate-slide-up">
+            <div className="text-6xl mb-6 bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-inner">
+              ✓
+            </div>
+            <h2 className="text-2xl font-bold text-slate-800">
               Persona registrada
             </h2>
-            <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
+            <p className="text-slate-500 font-medium mt-3">
+              Volviendo al panel...
+            </p>
           </div>
         </main>
       </div>
@@ -100,31 +112,37 @@ export const PersonaNuevaPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
-      {/* Decors */}
-      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+    <div className="login-wrapper relative flex flex-col">
+      {/* Elementos decorativos */}
+      <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
+      <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
 
-      <Navbar />
+      <div
+        className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
+        style={{ animationDelay: "1.5s" }}
+      ></div>
 
-      <main className="flex-1 flex items-center justify-center p-4">
-        <div className="w-full max-w-xl relative z-10 animate-slide-up">
+      <Navbar></Navbar>
+      <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
+        <div className="w-full max-w-xl relative p-4 z-10 animate-slide-up">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight mt-14">
               Registrar persona
             </h1>
-            <p className="text-gray-500 mt-1 text-sm">
-              Completa la informacion del usuario
+            <p className="text-brand-primary  font-semibold">
+              Completa la información del usuario
             </p>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-xl p-8">
+          <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-100/50 border border-white/60 p-8 sm:p-10">
             {error && (
-              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+              <div className="mb-6 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2">
+                <span className="text-red-500">⚠️</span>
                 {error}
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
               <FormSelect
                 label="Tipo de persona"
                 required
@@ -175,7 +193,7 @@ export const PersonaNuevaPage = () => {
               </div>
 
               <FormInput
-                label="Direccion"
+                label="Dirección"
                 required
                 value={form.direccion}
                 onChange={(e) => set("direccion", e.target.value)}
@@ -241,21 +259,23 @@ export const PersonaNuevaPage = () => {
                 </>
               )}
 
-              <div className="flex gap-3 pt-2">
-                <button
+              <div className="flex gap-4 pt-4">
+                <Button
                   type="button"
+                  variant="outline"
                   onClick={() => navigate("/dashboard")}
-                  className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  fullWidth
                 >
                   Cancelar
-                </button>
-                <button
+                </Button>
+                <Button
                   type="submit"
+                  variant="primary"
                   disabled={loading}
-                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                  fullWidth
                 >
                   {loading ? "Guardando..." : "Registrar"}
-                </button>
+                </Button>
               </div>
             </form>
           </div>

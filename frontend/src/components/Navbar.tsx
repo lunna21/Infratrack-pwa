@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Button } from "./Button";
 import logo from "../assets/logo.png";
 
-export const Navbar = () => {
+export const Navbar = ({ className }: { className?: string }) => {
   const { usuario, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -13,7 +13,7 @@ export const Navbar = () => {
   };
 
   return (
-    <nav className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/50 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <nav className={`bg-white/80 backdrop-blur-xl shadow-sm w-full fixed top-0 left-0 border-b border-white/50 px-6 py-4  flex items-center justify-between z-50 ${className}`}>
       <div
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => navigate("/dashboard")}
