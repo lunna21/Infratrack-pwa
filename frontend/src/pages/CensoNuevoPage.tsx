@@ -6,7 +6,7 @@ import type { Mascota, Persona } from '../types';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
 
-const COLOR_DEFAULT = 'B0F0FF';
+const COLOR_DEFAULT = '#B0F0FF';
 const PROYECTO_DEFAULT = 'PROPWA_004';
 
 export const CensoNuevoPage = () => {
