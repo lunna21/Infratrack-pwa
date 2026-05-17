@@ -4,7 +4,7 @@ import { MdPets } from "react-icons/md";
 import { MdAssignmentAdd } from "react-icons/md";
 import { TbMapHeart } from "react-icons/tb";
 import { Navbar } from "../components/Navbar";
-import  { CatAnimation } from "../components/CatAnimation";
+import { CatAnimation } from "../components/CatAnimation";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -110,7 +110,7 @@ export const DashboardPage = () => {
             </button>
           ))}
         </div>
-        
+
         {/* Decoración del gato animado */}
         <div className="-mt-10 sm:-mt-12 flex justify-center opacity-80 pointer-events-none">
           <CatAnimation className="w-96 h-96 sm:w-[450px] sm:h-[450px] drop-shadow-xl" />

@@ -14,8 +14,8 @@ export const Navbar = () => {
 
   return (
     <nav className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/50 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-      <div 
-        className="flex items-center gap-3 cursor-pointer" 
+      <div
+        className="flex items-center gap-3 cursor-pointer"
         onClick={() => navigate("/dashboard")}
       >
         <div className="w-14 h-14 rounded-xl flex items-center justify-center text-white text-xl transform hover:rotate-12 transition-transform">

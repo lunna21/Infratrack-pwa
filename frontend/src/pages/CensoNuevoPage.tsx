@@ -289,7 +289,9 @@ export const CensoNuevoPage = () => {
         <main className="flex-1 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
             <div className="text-5xl mb-4">📋</div>
-            <h2 className="text-xl font-bold text-gray-900">Censo registrado</h2>
+            <h2 className="text-xl font-bold text-gray-900">
+              Censo registrado
+            </h2>
             <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
           </div>
         </main>
@@ -309,176 +311,179 @@ export const CensoNuevoPage = () => {
             </p>
           </div>
 
-        <div className="bg-white rounded-2xl shadow-xl p-8">
-          {error && (
-            <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
-              {error}
-            </div>
-          )}
+          <div className="bg-white rounded-2xl shadow-xl p-8">
+            {error && (
+              <div className="mb-4 p-3 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm">
+                {error}
+              </div>
+            )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <FormSelect
-              label="Mascota"
-              required
-              value={form.idMascota}
-              onChange={(e) => set("idMascota", e.target.value)}
-              options={mascotaOptions}
-            />
-
-            <FormSelect
-              label="Dueno"
-              required
-              value={form.idDueno}
-              onChange={(e) => set("idDueno", e.target.value)}
-              options={duenoOptions}
-            />
-
-            <div className="grid grid-cols-2 gap-3">
-              <FormInput
-                label="Latitud"
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <FormSelect
+                label="Mascota"
                 required
-                type="number"
-                step="0.000001"
-                value={form.lat}
-                onChange={(e) => set("lat", e.target.value)}
-                placeholder="5.5343"
+                value={form.idMascota}
+                onChange={(e) => set("idMascota", e.target.value)}
+                options={mascotaOptions}
               />
-              <FormInput
-                label="Longitud"
+
+              <FormSelect
+                label="Dueno"
                 required
-                type="number"
-                step="0.000001"
-                value={form.lon}
-                onChange={(e) => set("lon", e.target.value)}
-                placeholder="-73.3678"
+                value={form.idDueno}
+                onChange={(e) => set("idDueno", e.target.value)}
+                options={duenoOptions}
               />
-            </div>
 
-            <div className="space-y-2">
-              <label className="block text-xs font-medium text-gray-700">
-                Fotografia *
-              </label>
+              <div className="grid grid-cols-2 gap-3">
+                <FormInput
+                  label="Latitud"
+                  required
+                  type="number"
+                  step="0.000001"
+                  value={form.lat}
+                  onChange={(e) => set("lat", e.target.value)}
+                  placeholder="5.5343"
+                />
+                <FormInput
+                  label="Longitud"
+                  required
+                  type="number"
+                  step="0.000001"
+                  value={form.lon}
+                  onChange={(e) => set("lon", e.target.value)}
+                  placeholder="-73.3678"
+                />
+              </div>
 
-              {!form.fotografia && (
-                <div className="rounded-lg border border-gray-200 p-3">
-                  <div className="flex flex-wrap gap-2">
+              <div className="space-y-2">
+                <label className="block text-xs font-medium text-gray-700">
+                  Fotografia *
+                </label>
+
+                {!form.fotografia && (
+                  <div className="rounded-lg border border-gray-200 p-3">
+                    <div className="flex flex-wrap gap-2">
+                      {!cameraActive && (
+                        <button
+                          type="button"
+                          onClick={() =>
+                            startCamera(
+                              facingMode,
+                              selectedDeviceId || undefined,
+                            )
+                          }
+                          className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                        >
+                          Activar camara
+                        </button>
+                      )}
+                      {videoDevices.length > 1 && (
+                        <FormSelect
+                          label="Camara"
+                          value={selectedDeviceId}
+                          onChange={(e) => {
+                            const nextId = e.target.value;
+                            setSelectedDeviceId(nextId);
+                            if (cameraActive) {
+                              void startCamera(facingMode, nextId);
+                            }
+                          }}
+                          options={videoDevices.map((device) => ({
+                            value: device.deviceId,
+                            label: device.label || "Camara",
+                          }))}
+                          labelClassName="block text-xs font-medium text-gray-700"
+                          selectClassName="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      )}
+                    </div>
+
                     {!cameraActive && (
+                      <p className="text-xs text-gray-500 mt-2">
+                        {cameraReady
+                          ? "La camara ya fue autorizada. Activa para previsualizar."
+                          : "Se solicitara permiso de camara si aun no esta autorizado."}
+                      </p>
+                    )}
+
+                    {cameraActive && (
+                      <div className="mt-3 space-y-2">
+                        <video
+                          ref={videoRef}
+                          autoPlay
+                          playsInline
+                          className="w-full rounded-lg border border-gray-200"
+                        />
+                        <div className="flex gap-2">
+                          <button
+                            type="button"
+                            onClick={capturePhoto}
+                            className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                          >
+                            Tomar foto
+                          </button>
+                          <button
+                            type="button"
+                            onClick={stopCamera}
+                            className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
+                          >
+                            Cancelar
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {form.fotografia && (
+                  <div className="rounded-lg border border-gray-200 p-3 space-y-2">
+                    <img
+                      src={form.fotografia}
+                      alt="Fotografia capturada"
+                      className="w-full rounded-lg border border-gray-200"
+                    />
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <span>
+                        Tamano:{" "}
+                        {photoBytes
+                          ? `${(photoBytes / 1024).toFixed(1)} KB`
+                          : "N/A"}
+                      </span>
                       <button
                         type="button"
-                        onClick={() =>
-                          startCamera(facingMode, selectedDeviceId || undefined)
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
-                      >
-                        Activar camara
-                      </button>
-                    )}
-                    {videoDevices.length > 1 && (
-                      <FormSelect
-                        label="Camara"
-                        value={selectedDeviceId}
-                        onChange={(e) => {
-                          const nextId = e.target.value;
-                          setSelectedDeviceId(nextId);
-                          if (cameraActive) {
-                            void startCamera(facingMode, nextId);
-                          }
+                        onClick={() => {
+                          set("fotografia", "");
+                          setPhotoBytes(null);
                         }}
-                        options={videoDevices.map((device) => ({
-                          value: device.deviceId,
-                          label: device.label || "Camara",
-                        }))}
-                        labelClassName="block text-xs font-medium text-gray-700"
-                        selectClassName="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    )}
-                  </div>
-
-                  {!cameraActive && (
-                    <p className="text-xs text-gray-500 mt-2">
-                      {cameraReady
-                        ? "La camara ya fue autorizada. Activa para previsualizar."
-                        : "Se solicitara permiso de camara si aun no esta autorizado."}
-                    </p>
-                  )}
-
-                  {cameraActive && (
-                    <div className="mt-3 space-y-2">
-                      <video
-                        ref={videoRef}
-                        autoPlay
-                        playsInline
-                        className="w-full rounded-lg border border-gray-200"
-                      />
-                      <div className="flex gap-2">
-                        <button
-                          type="button"
-                          onClick={capturePhoto}
-                          className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
-                        >
-                          Tomar foto
-                        </button>
-                        <button
-                          type="button"
-                          onClick={stopCamera}
-                          className="border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2 px-4 rounded-lg text-sm transition-colors"
-                        >
-                          Cancelar
-                        </button>
-                      </div>
+                        className="text-blue-600 hover:underline"
+                      >
+                        Tomar otra
+                      </button>
                     </div>
-                  )}
-                </div>
-              )}
-
-              {form.fotografia && (
-                <div className="rounded-lg border border-gray-200 p-3 space-y-2">
-                  <img
-                    src={form.fotografia}
-                    alt="Fotografia capturada"
-                    className="w-full rounded-lg border border-gray-200"
-                  />
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <span>
-                      Tamano:{" "}
-                      {photoBytes
-                        ? `${(photoBytes / 1024).toFixed(1)} KB`
-                        : "N/A"}
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        set("fotografia", "");
-                        setPhotoBytes(null);
-                      }}
-                      className="text-blue-600 hover:underline"
-                    >
-                      Tomar otra
-                    </button>
                   </div>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
 
-            <div className="flex gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => navigate("/dashboard")}
-                className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
-              >
-                Cancelar
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
-              >
-                {loading ? "Guardando..." : "Registrar"}
-              </button>
-            </div>
-          </form>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => navigate("/dashboard")}
+                  className="flex-1 border border-gray-300 hover:bg-gray-50 text-gray-700 font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-semibold py-2.5 rounded-lg text-sm transition-colors"
+                >
+                  {loading ? "Guardando..." : "Registrar"}
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
-      </div>
       </main>
     </div>
   );

@@ -1,5 +1,5 @@
-import React from 'react';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import React from "react";
+import { DotLottieReact } from "@lottiefiles/dotlottie-react";
 
 export const CatAnimation = ({ className }: { className?: string }) => {
   return (
