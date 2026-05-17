@@ -5,6 +5,7 @@ import { crearMascotaApi } from '../services/api';
 import type { Mascota } from '../types';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
+import { Navbar } from '../components/Navbar';
 
 const TIPOS_MASCOTA: Mascota['tipo'][] = ['PERRO', 'GATO', 'PAJARO', 'OTRO'];
 const GENEROS_MASCOTA = [
@@ -60,23 +61,28 @@ export const MascotaNuevaPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
-          <div className="text-5xl mb-4">🐾</div>
-          <h2 className="text-xl font-bold text-gray-900">Mascota registrada</h2>
-          <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
-        </div>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+        <Navbar />
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full">
+            <div className="text-5xl mb-4">🐾</div>
+            <h2 className="text-xl font-bold text-gray-900">Mascota registrada</h2>
+            <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
-      <div className="w-full max-w-xl">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Registrar mascota</h1>
-          <p className="text-gray-500 mt-1 text-sm">Completa la informacion de la mascota</p>
-        </div>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col">
+      <Navbar />
+      <main className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-xl">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Registrar mascota</h1>
+            <p className="text-gray-500 mt-1 text-sm">Completa la informacion de la mascota</p>
+          </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {error && (
@@ -152,6 +158,7 @@ export const MascotaNuevaPage = () => {
           </form>
         </div>
       </div>
+      </main>
     </div>
   );
 };

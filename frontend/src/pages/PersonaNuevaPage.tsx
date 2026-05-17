@@ -5,6 +5,7 @@ import { crearPersonaApi } from '../services/api';
 import { hashPassword } from '../utils/crypto';
 import { FormInput } from '../components/FormInput';
 import { FormSelect } from '../components/FormSelect';
+import { Navbar } from '../components/Navbar';
 
 const TIPOS_DOCUMENTO = ['CC', 'CE', 'Pasaporte', 'TI', 'NIT'];
 const TIPOS_PERSONA = [
@@ -77,28 +78,36 @@ export const PersonaNuevaPage = () => {
 
   if (success) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+      <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
         {/* Decors */}
-        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-        <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full relative z-10">
-          <div className="text-5xl mb-4">✅</div>
-          <h2 className="text-xl font-bold text-gray-900">Persona registrada</h2>
-          <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
-        </div>
+        <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70 border border-[#b2ddf7]"></div>
+        
+        <Navbar />
+
+        <main className="flex-1 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-10 text-center max-w-sm w-full relative z-10">
+            <div className="text-5xl mb-4">✅</div>
+            <h2 className="text-xl font-bold text-gray-900">Persona registrada</h2>
+            <p className="text-gray-500 text-sm mt-2">Volviendo al panel...</p>
+          </div>
+        </main>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
       {/* Decors */}
       <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
       
-      <div className="w-full max-w-xl relative z-10 animate-slide-up">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Registrar persona</h1>
-          <p className="text-gray-500 mt-1 text-sm">Completa la informacion del usuario</p>
-        </div>
+      <Navbar />
+
+      <main className="flex-1 flex items-center justify-center p-4">
+        <div className="w-full max-w-xl relative z-10 animate-slide-up">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Registrar persona</h1>
+            <p className="text-gray-500 mt-1 text-sm">Completa la informacion del usuario</p>
+          </div>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
           {error && (
@@ -241,6 +250,7 @@ export const PersonaNuevaPage = () => {
           </form>
         </div>
       </div>
+      </main>
     </div>
   );
 };

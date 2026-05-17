@@ -1,21 +1,13 @@
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { IoPersonAdd } from "react-icons/io5";
 import { MdPets } from "react-icons/md";
-import { FcSurvey } from "react-icons/fc";
+import { MdAssignmentAdd } from "react-icons/md";
 import { TbMapHeart } from "react-icons/tb";
-import logo from "../assets/logo.png";
-
-
+import { Navbar } from "../components/Navbar";
+import  { CatAnimation } from "../components/CatAnimation";
 
 export const DashboardPage = () => {
-  const { usuario, logout } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
 
   const menuItems = [
     {
@@ -37,7 +29,7 @@ export const DashboardPage = () => {
       bgLight: "bg-amber-50",
     },
     {
-      icon: FcSurvey,
+      icon: MdAssignmentAdd,
       label: "Nuevo Censo",
       description: "Registro geolocalizado",
       path: "/censo/nuevo",
@@ -57,42 +49,14 @@ export const DashboardPage = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden">
+    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
       {/* Decors */}
       <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
 
-      {/* Navbar */}
-      <nav className="bg-white/80 backdrop-blur-xl shadow-sm border-b border-white/50 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl shadow-md cursor-default transform hover:rotate-12 transition-transform">
-            <img
-              src={logo}
-              alt="Logo"
-              className="w-12 h-12 object-contain"
-            />
-          </div>
-          <span className="font-extrabold text-slate-800 text-xl tracking-tight hidden sm:block">
-            Censo Mascotas
-          </span>
-        </div>
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-2 bg-slate-100 px-4 py-2 rounded-full border border-slate-200">
-            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-            <span className="text-sm font-medium text-slate-600">
-              Hola, <strong className="text-slate-800">{usuario}</strong>
-            </span>
-          </div>
-          <button
-            onClick={handleLogout}
-            className="text-sm bg-red-50 hover:bg-red-100 text-red-600 hover:text-red-700 font-bold px-4 py-2 rounded-full transition-colors border border-red-200/50 active:scale-95"
-          >
-            Salir
-          </button>
-        </div>
-      </nav>
+      <Navbar />
 
       {/* Content */}
-      <main className="max-w-5xl mx-auto px-6 py-10 relative z-10 animate-fade-in">
+      <main className="max-w-5xl mx-auto px-6 py-10 relative z-10 animate-fade-in flex-1 w-full">
         <div className="mb-10">
           <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
             Panel principal
@@ -127,7 +91,7 @@ export const DashboardPage = () => {
                 </p>
               </div>
 
-              <div className="mt-6 flex items-center text-sm font-bold text-indigo-600 opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300">
+              <div className="mt-6 flex items-center text-sm font-bold text-brand-primary opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300">
                 Iniciar ahora
                 <svg
                   className="w-4 h-4 ml-1"
@@ -145,6 +109,11 @@ export const DashboardPage = () => {
               </div>
             </button>
           ))}
+        </div>
+        
+        {/* Decoración del gato animado */}
+        <div className="-mt-10 sm:-mt-12 flex justify-center opacity-80 pointer-events-none">
+          <CatAnimation className="w-96 h-96 sm:w-[450px] sm:h-[450px] drop-shadow-xl" />
         </div>
       </main>
     </div>
