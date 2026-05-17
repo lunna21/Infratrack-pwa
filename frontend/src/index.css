@@ -44,9 +44,10 @@
   .login-btn {
     @apply w-full bg-gradient-to-r from-brand-primary to-brand-secondary hover:from-brand-hover-start hover:to-brand-hover-end disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-full text-sm shadow-[0_8px_20px_-6px_rgba(60,160,212,0.4)] transform hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 mt-4;
   }
-  .login-link {
-    @apply text-brand-hover-end font-bold hover:underline transition-all;
-  }
+
+.login-link {
+  @apply text-brand-hover font-bold no-underline hover:opacity-10 transition-all;
+}  
 
   /* Efectos visuales de fondo y Glassmorphism */
   .glass-panel {
@@ -76,7 +77,7 @@
   }
 
   .btn-outline {
-    @apply bg-transparent border-2 border-brand-primary text-brand-primary hover:bg-brand-primary hover:text-white;
+    @apply bg-transparent border-2 border-brand-primary text-brand-primary hover:bg-brand-light hover:text-white;
   }
 
 }

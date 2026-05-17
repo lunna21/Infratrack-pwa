@@ -1,12 +1,13 @@
-import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { crearPersonaApi } from '../services/api';
-import { v4 as uuidv4 } from 'uuid';
-import { hashPassword } from '../utils/crypto';
-import { FormInput } from '../components/FormInput';
-import { FormSelect } from '../components/FormSelect';
+import { useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
+import { crearPersonaApi } from "../services/api";
+import { v4 as uuidv4 } from "uuid";
+import { hashPassword } from "../utils/crypto";
+import { FormInput } from "../components/FormInput";
+import { FormSelect } from "../components/FormSelect";
 import { AnimalFootPrint } from "../components/AnimalFootPrint";
-
+import { Button } from "../components/Button";
+import logo from "../assets/logo.png";
 
 const TIPOS_DOCUMENTO = ["CC", "CE", "Pasaporte", "TI", "NIT"];
 
@@ -91,38 +92,38 @@ export const RegistroPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-blue-50 py-10 px-4 relative overflow-hidden flex items-center justify-center">
+    <div className="login-wrapper">
       {/* Elementos decorativos */}
       <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
-            <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
+      <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
 
       <div
         className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
         style={{ animationDelay: "1.5s" }}
       ></div>
 
-      <div className="w-full max-w-lg relative z-10 animate-slide-up">
+      <div className="w-full max-w-xl relative z-10 animate-slide-up">
         {/* Header */}
-        <div className="text-center mb-8 flex flex-col items-center">
-          <div className="w-20 h-20 bg-white/80 backdrop-blur-xl rounded-2xl shadow-lg border border-white/50 flex items-center justify-center mb-5">
+        <div className="text-center mb-2.5 flex flex-col items-center">
+          <div className="w-40 h-40  flex items-center justify-center">
             <img
-              src="/icons/favicon-96x96.png"
+              src={logo}
               alt="Logo"
-              className="w-12 h-12 object-contain"
+              className="w-40 h-40 object-contain"
             />
           </div>
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
             Crea tu cuenta
           </h1>
-          <p className="text-indigo-600 mt-2 font-semibold">
+          <p className="text-brand-primary mt-2 font-semibold">
             Paso {step} <span className="text-slate-400 font-medium">de 2</span>
           </p>
         </div>
 
         {/* Progress bar */}
-        <div className="w-full bg-slate-200/50 rounded-full h-2.5 mb-8 overflow-hidden backdrop-blur-sm border border-white/40 shadow-inner">
+        <div className="w-full bg-slate-200/50 rounded-full h-2.5 mb-4 overflow-hidden backdrop-blur-sm border border-white/40 shadow-inner">
           <div
-            className="bg-gradient-to-r from-indigo-500 to-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out"
+            className="bg-gradient-to-r from-brand-primary to-blue-500 h-2.5 rounded-full transition-all duration-500 ease-out"
             style={{ width: step === 1 ? "50%" : "100%" }}
           />
         </div>
@@ -137,8 +138,8 @@ export const RegistroPage = () => {
 
           {/* Step 1: Datos personales */}
           {step === 1 && (
-            <form onSubmit={handleNext} className="space-y-5 animate-fade-in">
-              <h2 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-3 mb-5">
+            <form onSubmit={handleNext} className="space-y-3 animate-fade-in">
+              <h2 className="font-bold text-slate-800 text-xl border-b border-slate-100 pb-3 mb-3">
                 Información Personal
               </h2>
 
@@ -147,18 +148,18 @@ export const RegistroPage = () => {
                   label="Nombres"
                   required
                   value={form.nombres}
-                  onChange={e => set('nombres', e.target.value)}
+                  onChange={(e) => set("nombres", e.target.value)}
                   placeholder="Juan Andres"
-                  pattern="^[A-Za-z ]+$"
+                  pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
                   title="Solo letras y espacios"
                 />
                 <FormInput
                   label="Apellidos"
                   required
                   value={form.apellidos}
-                  onChange={e => set('apellidos', e.target.value)}
+                  onChange={(e) => set("apellidos", e.target.value)}
                   placeholder="Perez Gomez"
-                  pattern="^[A-Za-z ]+$"
+                  pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
                   title="Solo letras y espacios"
                 />
               </div>
@@ -168,14 +169,14 @@ export const RegistroPage = () => {
                   label="Tipo documento"
                   required
                   value={form.tipoDocumento}
-                  onChange={e => set('tipoDocumento', e.target.value)}
-                  options={TIPOS_DOCUMENTO.map(t => ({ value: t }))}
+                  onChange={(e) => set("tipoDocumento", e.target.value)}
+                  options={TIPOS_DOCUMENTO.map((t) => ({ value: t }))}
                 />
                 <FormInput
                   label="Numero documento"
                   required
                   value={form.documento}
-                  onChange={e => set('documento', e.target.value)}
+                  onChange={(e) => set("documento", e.target.value)}
                   placeholder="1000200300"
                   inputMode="numeric"
                   pattern="^[0-9]+$"
@@ -187,9 +188,9 @@ export const RegistroPage = () => {
                 label="Direccion"
                 required
                 value={form.direccion}
-                onChange={e => set('direccion', e.target.value)}
+                onChange={(e) => set("direccion", e.target.value)}
                 placeholder="Calle 1 # 2-3"
-                pattern="^[A-Za-z0-9 #.-]+$"
+                pattern="^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ #.,-]+$"
                 title="Letras, numeros y caracteres # . -"
               />
 
@@ -198,38 +199,35 @@ export const RegistroPage = () => {
                   label="Telefono"
                   required
                   value={form.telefono}
-                  onChange={e => set('telefono', e.target.value)}
+                  onChange={(e) => set("telefono", e.target.value)}
                   placeholder="3001234567"
                   inputMode="numeric"
-                  pattern="^[0-9]+$"
+                  pattern="^[0-9]{10,10}$"
                   title="Solo numeros"
                 />
                 <FormInput
                   label="Ciudad"
                   required
                   value={form.ciudad}
-                  onChange={e => set('ciudad', e.target.value)}
+                  onChange={(e) => set("ciudad", e.target.value)}
                   placeholder="Tunja"
-                  pattern="^[A-Za-z ]+$"
+                  pattern="^[A-Za-zÁÉÍÓÚáéíóúÑñ ]+$"
                   title="Solo letras y espacios"
                 />
               </div>
 
-              <div className="pt-4">
-                <button
-                  type="submit"
-                  className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-500/25 transform hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200"
-                >
+              <div className="pt-2">
+                <Button variant="primary" type="submit" fullWidth>
                   Continuar al paso final
-                </button>
+                </Button>
               </div>
             </form>
           )}
 
           {/* Step 2: Credenciales */}
           {step === 2 && (
-            <form onSubmit={handleSubmit} className="space-y-5 animate-fade-in">
-              <h2 className="font-bold text-slate-800 text-lg border-b border-slate-100 pb-3 mb-5">
+            <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
+              <h2 className="font-bold text-slate-800 text-xl border-b border-slate-100 pb-3 mb-4">
                 Seguridad de la Cuenta
               </h2>
 
@@ -237,63 +235,65 @@ export const RegistroPage = () => {
                 label="Usuario"
                 required
                 value={form.usuario}
-                onChange={e => set('usuario', e.target.value)}
+                onChange={(e) => set("usuario", e.target.value)}
                 placeholder="mi_usuario"
-                pattern="^[A-Za-z0-9._-]+$"
+                pattern="^[A-Za-z0-9._\-]{4,20}$"
                 title="Solo letras, numeros, punto, guion y guion bajo"
               />
 
               <FormInput
-                label="Contrasena"
+                label="Contraseña"
                 required
                 type="password"
                 value={form.contrasena}
-                onChange={e => set('contrasena', e.target.value)}
+                pattern="^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*?&]{6,}$"
+                title="Minimo 6 caracteres, al menos una letra y un numero"
+                onChange={(e) => set("contrasena", e.target.value)}
                 placeholder="Minimo 6 caracteres"
               />
 
               <FormInput
-                label="Confirmar contrasena"
+                label="Confirmar contraseña"
                 required
                 type="password"
                 value={form.confirmarContrasena}
-                onChange={e => set('confirmarContrasena', e.target.value)}
+                onChange={(e) => set("confirmarContrasena", e.target.value)}
                 placeholder="Repite la contrasena"
               />
 
               <div className="flex gap-4 pt-4">
-                <button
+                <Button
                   type="button"
                   onClick={() => setStep(1)}
-                  className="flex-1 bg-white border-2 border-slate-200 hover:bg-slate-50 text-slate-700 font-bold py-3.5 rounded-xl text-sm transition-colors active:scale-[0.98]"
+                  variant="outline"
+                  className="flex-1"
                 >
                   Volver
-                </button>
-                <button
+                </Button>
+
+                <Button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-xl text-sm shadow-lg shadow-indigo-500/25 active:scale-[0.98] transition-all"
+                  variant="primary"
+                  className="flex-1"
                 >
                   {loading ? (
                     <span className="flex items-center justify-center gap-2">
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
                       Creando...
                     </span>
                   ) : (
                     "Finalizar"
                   )}
-                </button>
+                </Button>
               </div>
             </form>
           )}
 
-          <div className="mt-8 text-center bg-slate-50/50 p-4 rounded-xl">
+          <div className="mt-4 text-center bg-slate-50/50 p-1 rounded-xl">
             <p className="text-sm font-medium text-slate-500">
               ¿Ya tienes una cuenta?{" "}
-              <Link
-                to="/login"
-                className="text-indigo-600 font-bold hover:text-indigo-700 transition-colors"
-              >
+              <Link to="/login" className="login-link">
                 Inicia sesión aquí
               </Link>
             </p>
