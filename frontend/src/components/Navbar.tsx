@@ -13,7 +13,9 @@ export const Navbar = ({ className }: { className?: string }) => {
   };
 
   return (
-    <nav className={`bg-white/80 backdrop-blur-xl shadow-sm w-full fixed top-0 left-0 border-b border-white/50 px-6 py-4  flex items-center justify-between z-50 ${className}`}>
+    <nav
+      className={`bg-white/80 backdrop-blur-xl shadow-sm w-full fixed top-0 left-0 border-b border-white/50 px-6 py-4  flex items-center justify-between z-50 ${className}`}
+    >
       <div
         className="flex items-center gap-3 cursor-pointer"
         onClick={() => navigate("/dashboard")}
