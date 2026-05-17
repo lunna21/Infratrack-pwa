@@ -133,7 +133,7 @@ export const CensoNuevoPage = () => {
           });
           if (status.state === "denied") {
             setCameraActive(false);
-            setError("Permiso de camara denegado. Habilitalo en el navegador.");
+            setError("Permiso de cámara denegado. Habilitalo en el navegador.");
             return;
           }
         } catch {
@@ -160,8 +160,8 @@ export const CensoNuevoPage = () => {
       setCameraActive(false);
       setError(
         err instanceof Error
-          ? `No se pudo acceder a la camara: ${err.message}`
-          : "No se pudo acceder a la camara",
+          ? `No se pudo acceder a la cámara: ${err.message}`
+          : "No se pudo acceder a la cámara",
       );
     }
   };
@@ -210,7 +210,7 @@ export const CensoNuevoPage = () => {
 
     if (bytes > maxBytes) {
       setError(
-        "La fotografia supera 50 KB. Acerca la camara o intenta de nuevo.",
+        "La fotografia supera 50 KB. Acerca la cámara o intenta de nuevo.",
       );
       return;
     }
@@ -247,7 +247,7 @@ export const CensoNuevoPage = () => {
     setError("");
 
     if (!form.fotografia) {
-      setError("Debes tomar una fotografia con la camara");
+      setError("Debes tomar una fotografia con la cámara");
       return;
     }
 
@@ -323,8 +323,8 @@ export const CensoNuevoPage = () => {
       <Navbar />
       <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
         <div className="w-full max-w-xl relative z-10 animate-slide-up">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight">
+          <div className="text-center mb-4">
+            <h1 className="text-3xl font-extrabold mt-16 text-slate-800 tracking-tight">
               Nuevo censo
             </h1>
             <p className="text-brand-primary mt-1 font-semibold">
@@ -350,7 +350,7 @@ export const CensoNuevoPage = () => {
               />
 
               <FormSelect
-                label="Dueno"
+                label="Dueño"
                 required
                 value={form.idDueno}
                 onChange={(e) => set("idDueno", e.target.value)}
@@ -380,7 +380,7 @@ export const CensoNuevoPage = () => {
 
               <div className="space-y-2">
                 <label className="block text-xs font-medium text-gray-700">
-                  Fotografia *
+                  Fotografía *
                 </label>
 
                 {!form.fotografia && (
@@ -397,7 +397,7 @@ export const CensoNuevoPage = () => {
                             )
                           }
                         >
-                          Activar camara
+                          Activar cámara
                         </Button>
                       )}
                       {videoDevices.length > 1 && (
@@ -424,8 +424,8 @@ export const CensoNuevoPage = () => {
                     {!cameraActive && (
                       <p className="text-xs text-gray-500 mt-2">
                         {cameraReady
-                          ? "La camara ya fue autorizada. Activa para previsualizar."
-                          : "Se solicitara permiso de camara si aun no esta autorizado."}
+                          ? "La cámara ya fue autorizada. Activa para previsualizar."
+                          : "Se solicitará permiso de cámara si aún no esta autorizado."}
                       </p>
                     )}
 
@@ -462,7 +462,7 @@ export const CensoNuevoPage = () => {
                   <div className="rounded-lg border border-gray-200 p-3 space-y-2">
                     <img
                       src={form.fotografia}
-                      alt="Fotografia capturada"
+                      alt="Fotografía capturada"
                       className="w-full rounded-lg border border-gray-200"
                     />
                     <div className="flex items-center justify-between text-xs text-gray-500">
