@@ -20,7 +20,7 @@ export const CensoNuevoPage = () => {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [cameraActive, setCameraActive] = useState(false);
-  const [facingMode, setFacingMode] = useState<"user" | "environment">("user");
+  const [facingMode] = useState<"user" | "environment">("user");
   const [photoBytes, setPhotoBytes] = useState<number | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
