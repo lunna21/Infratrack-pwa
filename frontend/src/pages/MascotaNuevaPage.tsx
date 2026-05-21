@@ -165,7 +165,7 @@ export const MascotaNuevaPage = () => {
                   placeholder="2"
                 />
                 <FormInput
-                  label="Fotografia (URL)"
+                  label="Fotografía (URL)"
                   value={form.fotografia}
                   onChange={(e) => set("fotografia", e.target.value)}
                   placeholder="https://..."

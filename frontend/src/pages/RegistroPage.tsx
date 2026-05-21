@@ -169,7 +169,7 @@ export const RegistroPage = () => {
                   options={TIPOS_DOCUMENTO.map((t) => ({ value: t }))}
                 />
                 <FormInput
-                  label="Numero documento"
+                  label="Número documento"
                   required
                   value={form.documento}
                   onChange={(e) => set("documento", e.target.value)}
