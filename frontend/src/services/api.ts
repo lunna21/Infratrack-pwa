@@ -76,7 +76,7 @@ export const loginApi = (data: LoginRequest): Promise<LoginResponse> =>
   });
 
 // Personas
-export const crearPersonaApi = (persona: Persona): Promise<Persona> =>
+export const crearPersonaApi = (persona: Omit<Persona, "id">): Promise<Persona> =>
   requestJson<Persona>(`${API_BASE_URL}/personas`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -87,7 +87,7 @@ export const getPersonasApi = (): Promise<Persona[]> =>
   requestJson<Persona[]>(`${API_BASE_URL}/personas`, { headers: getAuthHeaders() });
 
 // Mascotas
-export const crearMascotaApi = (mascota: Mascota): Promise<Mascota> =>
+export const crearMascotaApi = (mascota: Omit<Mascota, "id">): Promise<Mascota> =>
   requestJson<Mascota>(`${API_BASE_URL}/mascotas`, {
     method: 'POST',
     headers: getAuthHeaders(),
@@ -98,7 +98,7 @@ export const getMascotasApi = (): Promise<Mascota[]> =>
   requestJson<Mascota[]>(`${API_BASE_URL}/mascotas`, { headers: getAuthHeaders() });
 
 // Censos
-export const crearCensoApi = (censo: Censo): Promise<Censo> =>
+export const crearCensoApi = (censo: Omit<Censo, "id">): Promise<Censo> =>
   requestJson<Censo>(`${API_BASE_URL}/censos`, {
     method: 'POST',
     headers: getAuthHeaders(),

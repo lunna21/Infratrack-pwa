@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { crearPersonaApi } from "../services/api";
 import { hashPassword } from "../utils/crypto";
 import { FormInput } from "../components/FormInput";
@@ -65,7 +64,6 @@ export const PersonaNuevaPage = () => {
       const contrasenaHash = contrasena ? await hashPassword(contrasena) : "";
       await crearPersonaApi({
         ...rest,
-        id: uuidv4(),
         usuario: tipoPersona === "USUARIO" ? rest.usuario : null,
         contrasena: tipoPersona === "USUARIO" ? contrasenaHash : undefined,
       });
