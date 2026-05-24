@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { crearPersonaApi } from "../services/api";
-import { v4 as uuidv4 } from "uuid";
 import { hashPassword } from "../utils/crypto";
 import { FormInput } from "../components/FormInput";
 import { FormSelect } from "../components/FormSelect";
@@ -59,7 +58,6 @@ export const RegistroPage = () => {
       const contrasenaHash = await hashPassword(contrasena);
       await crearPersonaApi({
         ...rest,
-        id: uuidv4(),
         contrasena: contrasenaHash,
       });
       setSuccess(true);
@@ -186,7 +184,7 @@ export const RegistroPage = () => {
                 value={form.direccion}
                 onChange={(e) => set("direccion", e.target.value)}
                 placeholder="Calle 1 # 2-3"
-                pattern="^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ #.,-]+$"
+                pattern="^[A-Za-z0-9ÁÉÍÓÚáéíóúÑñ #.,\-]+$"
                 title="Letras, numeros y caracteres # . -"
               />
 

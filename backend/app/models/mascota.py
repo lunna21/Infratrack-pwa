@@ -4,7 +4,7 @@ Modelo SQLAlchemy: Mascota.
 
 import uuid
 import enum
-from sqlalchemy import Column, String, Float, Enum
+from sqlalchemy import Column, String, Float, Enum, Text
 from sqlalchemy.orm import relationship
 from ..database import Base
 from .guid import GUID
@@ -30,7 +30,7 @@ class Mascota(Base):
     tipo = Column(Enum(TipoMascota), nullable=False)
     genero = Column(String(20), nullable=False)
     edad = Column(Float, nullable=False)
-    fotografia = Column(String(500), nullable=True)
+    fotografia = Column(Text, nullable=True)
 
     # Relación inversa con Censo
     censos = relationship("Censo", back_populates="mascota")

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
+import imageCompression from "browser-image-compression";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { crearCensoApi, getMascotasApi, getPersonasApi } from "../services/api";
 import type { Mascota, Persona } from "../types";
 import { FormInput } from "../components/FormInput";
@@ -174,7 +174,7 @@ export const CensoNuevoPage = () => {
     setCameraActive(false);
   };
 
-  const capturePhoto = () => {
+  const capturePhoto = async () => {
     const video = videoRef.current;
     if (!video) return;
 
@@ -185,39 +185,51 @@ export const CensoNuevoPage = () => {
     const maxBytes = 50 * 1024;
     const baseWidth = video.videoWidth;
     const baseHeight = video.videoHeight;
+    canvas.width = baseWidth;
+    canvas.height = baseHeight;
+    context.drawImage(video, 0, 0, baseWidth, baseHeight);
 
-    let scale = 1;
-    let quality = 0.85;
-    let dataUrl = "";
-    let bytes = 0;
+    try {
+      const rawBlob = await new Promise<Blob>((resolve, reject) => {
+        canvas.toBlob(
+          (blob) => (blob ? resolve(blob) : reject(new Error("Sin imagen"))),
+          "image/jpeg",
+          0.95,
+        );
+      });
 
-    for (let attempt = 0; attempt < 8; attempt += 1) {
-      const width = Math.max(1, Math.floor(baseWidth * scale));
-      const height = Math.max(1, Math.floor(baseHeight * scale));
-      canvas.width = width;
-      canvas.height = height;
-      context.drawImage(video, 0, 0, width, height);
-      dataUrl = canvas.toDataURL("image/jpeg", quality);
-      bytes = dataUrlBytes(dataUrl);
+      const rawFile = new File([rawBlob], "captura.jpg", {
+        type: "image/jpeg",
+      });
 
-      if (bytes <= maxBytes) break;
-      if (quality > 0.5) {
-        quality -= 0.1;
-      } else {
-        scale *= 0.9;
-      }
-    }
+      const compressedFile = await imageCompression(rawFile, {
+        maxSizeMB: 0.05,
+        maxWidthOrHeight: 1024,
+        useWebWorker: true,
+      });
 
-    if (bytes > maxBytes) {
-      setError(
-        "La fotografia supera 50 KB. Acerca la cámara o intenta de nuevo.",
+      const dataUrl = await imageCompression.getDataUrlFromFile(
+        compressedFile,
       );
-      return;
-    }
+      const bytes = dataUrlBytes(dataUrl);
 
-    set("fotografia", dataUrl);
-    setPhotoBytes(bytes);
-    stopCamera();
+      if (bytes > maxBytes) {
+        setError(
+          "La fotografia supera 50 KB. Acerca la cámara o intenta de nuevo.",
+        );
+        return;
+      }
+
+      set("fotografia", dataUrl);
+      setPhotoBytes(bytes);
+      stopCamera();
+    } catch (err: unknown) {
+      setError(
+        err instanceof Error
+          ? `No se pudo comprimir la foto: ${err.message}`
+          : "No se pudo comprimir la foto",
+      );
+    }
   };
 
   const mascotaOptions = useMemo(
@@ -266,7 +278,6 @@ export const CensoNuevoPage = () => {
     setLoading(true);
     try {
       await crearCensoApi({
-        id: uuidv4(),
         idMascota: form.idMascota,
         idDueno: form.idDueno,
         fotografia: form.fotografia || "",

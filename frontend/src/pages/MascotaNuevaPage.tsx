@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { crearMascotaApi } from "../services/api";
 import type { Mascota } from "../types";
 import { FormInput } from "../components/FormInput";
@@ -32,6 +31,7 @@ export const MascotaNuevaPage = () => {
   const set = (field: string, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -45,7 +45,6 @@ export const MascotaNuevaPage = () => {
     setLoading(true);
     try {
       await crearMascotaApi({
-        id: uuidv4(),
         nombre: form.nombre,
         tipo: form.tipo,
         genero: form.genero,
@@ -165,13 +164,14 @@ export const MascotaNuevaPage = () => {
                   placeholder="2"
                 />
                 <FormInput
-                  label="Fotografía (URL)"
+                  label="Fotografía (URL opcional)"
                   value={form.fotografia}
                   onChange={(e) => set("fotografia", e.target.value)}
                   placeholder="https://..."
                   type="url"
                 />
               </div>
+
 
               <div className="flex gap-4 pt-4">
                 <Button
