@@ -28,22 +28,25 @@ def crear_mascota(
     Registra la información biográfica de una mascota.
     Requiere JWT válido.
     """
-    # Verificar si ya existe con ese ID
-    existe = db.query(Mascota).filter(Mascota.id == body.id).first()
-    if existe:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Ya existe una mascota con ese ID.",
-        )
+    if body.id is not None:
+        existe = db.query(Mascota).filter(Mascota.id == body.id).first()
+        if existe:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Ya existe una mascota con ese ID.",
+            )
 
-    mascota = Mascota(
-        id=body.id,
-        nombre=body.nombre,
-        tipo=body.tipo,
-        genero=body.genero,
-        edad=body.edad,
-        fotografia=body.fotografia,
-    )
+    mascota_data = {
+        "nombre": body.nombre,
+        "tipo": body.tipo,
+        "genero": body.genero,
+        "edad": body.edad,
+        "fotografia": body.fotografia,
+    }
+    if body.id is not None:
+        mascota_data["id"] = body.id
+
+    mascota = Mascota(**mascota_data)
 
     db.add(mascota)
     db.commit()
