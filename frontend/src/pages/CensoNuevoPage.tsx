@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
+// import { v4 as uuidv4 } from "uuid";
 import { crearCensoApi, getMascotasApi, getPersonasApi } from "../services/api";
 import type { Mascota, Persona } from "../types";
 import { FormInput } from "../components/FormInput";
@@ -251,6 +251,12 @@ export const CensoNuevoPage = () => {
       return;
     }
 
+        navigator.geolocation.getCurrentPosition(
+          (pos) => console.log(pos),
+          (err) => console.error(err),
+        );
+
+
     const latNumber = Number(form.lat);
     const lonNumber = Number(form.lon);
     if (Number.isNaN(latNumber) || Number.isNaN(lonNumber)) {
@@ -266,7 +272,7 @@ export const CensoNuevoPage = () => {
     setLoading(true);
     try {
       await crearCensoApi({
-        id: uuidv4(),
+        // id: uuidv4(),
         idMascota: form.idMascota,
         idDueno: form.idDueno,
         fotografia: form.fotografia || "",

@@ -45,7 +45,6 @@ export const MascotaNuevaPage = () => {
     setLoading(true);
     try {
       await crearMascotaApi({
-        id: uuidv4(),
         nombre: form.nombre,
         tipo: form.tipo,
         genero: form.genero,

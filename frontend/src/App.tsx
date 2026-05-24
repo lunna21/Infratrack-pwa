@@ -1,12 +1,13 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { AuthProvider } from './context/AuthContext';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { LoginPage } from './pages/LoginPage';
-import { RegistroPage } from './pages/RegistroPage';
-import { DashboardPage } from './pages/DashboardPage';
-import { PersonaNuevaPage } from './pages/PersonaNuevaPage';
-import { MascotaNuevaPage } from './pages/MascotaNuevaPage';
-import { CensoNuevoPage } from './pages/CensoNuevoPage';
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./context/AuthContext";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { LoginPage } from "./pages/LoginPage";
+import { RegistroPage } from "./pages/RegistroPage";
+import { DashboardPage } from "./pages/DashboardPage";
+import { PersonaNuevaPage } from "./pages/PersonaNuevaPage";
+import { MascotaNuevaPage } from "./pages/MascotaNuevaPage";
+import { CensoNuevoPage } from "./pages/CensoNuevoPage";
+// import {MapaPage} from "./pages/MapaPage";
 
 function App() {
   return (
@@ -48,6 +49,14 @@ function App() {
               </ProtectedRoute>
             }
           />
+          {/* <Route
+            path="/mapa"
+            element={
+              <ProtectedRoute>
+                <MapaPage />
+              </ProtectedRoute>
+            }
+          /> */}
           {/* Próximas rutas (las iremos agregando) */}
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>

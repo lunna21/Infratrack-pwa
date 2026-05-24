@@ -1,5 +1,5 @@
 export interface Persona {
-  id: string;
+  // id: string;
   nombres: string;
   apellidos: string;
   tipoDocumento: string;
@@ -12,7 +12,7 @@ export interface Persona {
 }
 
 export interface Mascota {
-  id: string;
+  // id: string;
   nombre: string;
   tipo: 'PERRO' | 'GATO' | 'PAJARO' | 'OTRO';
   genero: string;
@@ -21,7 +21,7 @@ export interface Mascota {
 }
 
 export interface Censo {
-  id: string;
+  // id: string;
   idMascota: string;
   idDueno: string;
   fotografia: string;
@@ -33,8 +33,8 @@ export interface Censo {
 
 export interface CensoDetalle extends Censo {
   fotografiaCenso: string;
-  mascota: Pick<Mascota, 'id' | 'nombre' | 'tipo' | 'edad'>;
-  dueno: Pick<Persona, 'id' | 'nombres' | 'apellidos' | 'telefono'>;
+  mascota: Pick<Mascota, 'nombre' | 'tipo' | 'edad'>;
+  dueno: Pick<Persona,  'nombres' | 'apellidos' | 'telefono'>;
 }
 
 export interface LoginRequest {

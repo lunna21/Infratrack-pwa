@@ -59,7 +59,7 @@ export const RegistroPage = () => {
       const contrasenaHash = await hashPassword(contrasena);
       await crearPersonaApi({
         ...rest,
-        id: uuidv4(),
+  
         contrasena: contrasenaHash,
       });
       setSuccess(true);
