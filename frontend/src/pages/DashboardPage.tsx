@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
-import { IoPersonAdd } from "react-icons/io5";
+import { IoPersonAdd, IoPeople } from "react-icons/io5";
 import { MdPets } from "react-icons/md";
 import { MdAssignmentAdd } from "react-icons/md";
-import { TbMapHeart } from "react-icons/tb";
+import { TbMapHeart, TbListSearch } from "react-icons/tb";
 import { Navbar } from "../components/Navbar";
 import  { CatAnimation } from "../components/CatAnimation";
 
@@ -20,6 +20,15 @@ export const DashboardPage = () => {
       bgLight: "bg-emerald-50",
     },
     {
+      icon: IoPeople,
+      label: "Ver Personas",
+      description: "Lista y filtros",
+      path: "/personas",
+      bg: "bg-teal-500",
+      color: "text-teal-700",
+      bgLight: "bg-teal-50",
+    },
+    {
       icon: MdPets,
       label: "Registrar Mascota",
       description: "Nueva mascota",
@@ -27,6 +36,15 @@ export const DashboardPage = () => {
       bg: "bg-amber-500",
       color: "text-amber-700",
       bgLight: "bg-amber-50",
+    },
+    {
+      icon: TbListSearch,
+      label: "Ver Mascotas",
+      description: "Lista y filtros",
+      path: "/mascotas",
+      bg: "bg-orange-500",
+      color: "text-orange-700",
+      bgLight: "bg-orange-50",
     },
     {
       icon: MdAssignmentAdd,

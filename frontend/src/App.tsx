@@ -7,6 +7,8 @@ import { DashboardPage } from './pages/DashboardPage';
 import { PersonaNuevaPage } from './pages/PersonaNuevaPage';
 import { MascotaNuevaPage } from './pages/MascotaNuevaPage';
 import { CensoNuevoPage } from './pages/CensoNuevoPage';
+import { MascotasPage } from './pages/MascotasPage';
+import { PersonasPage } from './pages/PersonasPage';
 
 function App() {
   return (
@@ -33,10 +35,26 @@ function App() {
             }
           />
           <Route
+            path="/personas"
+            element={
+              <ProtectedRoute>
+                <PersonasPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/mascotas/nueva"
             element={
               <ProtectedRoute>
                 <MascotaNuevaPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mascotas"
+            element={
+              <ProtectedRoute>
+                <MascotasPage />
               </ProtectedRoute>
             }
           />

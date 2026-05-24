@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { v4 as uuidv4 } from "uuid";
 import { crearMascotaApi } from "../services/api";
 import type { Mascota } from "../types";
 import { FormInput } from "../components/FormInput";
@@ -45,7 +44,6 @@ export const MascotaNuevaPage = () => {
     setLoading(true);
     try {
       await crearMascotaApi({
-        id: uuidv4(),
         nombre: form.nombre,
         tipo: form.tipo,
         genero: form.genero,
