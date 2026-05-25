@@ -47,8 +47,9 @@ const handleResponse = async <T>(res: Response, url: string): Promise<T> => {
   if (!res.ok) {
     const bodyMessage = await parseErrorBody(res);
     const statusMessage = getStatusMessage(res.status);
-    const detail = bodyMessage ? ` Detalle: ${bodyMessage}` : '';
-    throw new Error(`${statusMessage} (${res.status} ${res.statusText}) en ${url}.${detail}`);
+    const finalMessage = bodyMessage ? bodyMessage : statusMessage;
+    
+    throw new Error(finalMessage);
   }
   return res.json();
 };
