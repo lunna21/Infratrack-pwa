@@ -25,6 +25,7 @@ export const CensoNuevoPage = () => {
   const [cameraReady, setCameraReady] = useState(false);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
+  const [useGps, setUseGps] = useState(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -38,6 +39,63 @@ export const CensoNuevoPage = () => {
 
   const set = (field: string, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
+
+  const getCurrentPosition = () =>
+    new Promise<GeolocationPosition>((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(new Error("Geolocalizacion no disponible en el navegador."));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(resolve, reject, {
+        enableHighAccuracy: true,
+        timeout: 10000,
+        maximumAge: 0,
+      });
+    });
+
+  const captureCoordinates = async () => {
+    const position = await getCurrentPosition();
+    const { latitude, longitude } = position.coords;
+    setForm((current) => ({
+      ...current,
+      lat: latitude.toFixed(6),
+      lon: longitude.toFixed(6),
+    }));
+    return { latitude, longitude };
+  };
+
+  useEffect(() => {
+    const initCoords = async () => {
+      setUseGps(true);
+      try {
+        await captureCoordinates();
+        setError("");
+      } catch {
+        setError(
+          "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
+        );
+      }
+    };
+
+    void initCoords();
+  }, []);
+
+  useEffect(() => {
+    if (!useGps || form.lat || form.lon) return;
+
+    const refreshCoords = async () => {
+      try {
+        await captureCoordinates();
+        setError("");
+      } catch {
+        setError(
+          "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
+        );
+      }
+    };
+
+    void refreshCoords();
+  }, [useGps, form.lat, form.lon]);
 
   useEffect(() => {
     let alive = true;
@@ -263,13 +321,6 @@ export const CensoNuevoPage = () => {
       return;
     }
 
-    const latNumber = Number(form.lat);
-    const lonNumber = Number(form.lon);
-    if (Number.isNaN(latNumber) || Number.isNaN(lonNumber)) {
-      setError("Latitud y longitud deben ser numeros validos");
-      return;
-    }
-
     if (!form.idMascota || !form.idDueno) {
       setError("Debes seleccionar una mascota y un dueño");
       return;
@@ -277,6 +328,19 @@ export const CensoNuevoPage = () => {
 
     setLoading(true);
     try {
+      let latNumber = Number(form.lat);
+      let lonNumber = Number(form.lon);
+
+      if (useGps || !form.lat || !form.lon) {
+        const { latitude, longitude } = await captureCoordinates();
+        latNumber = Number(latitude);
+        lonNumber = Number(longitude);
+      }
+
+      if (Number.isNaN(latNumber) || Number.isNaN(lonNumber)) {
+        setError("No se pudo obtener la ubicacion actual");
+        return;
+      }
       await crearCensoApi({
         idMascota: form.idMascota,
         idDueno: form.idDueno,
@@ -289,7 +353,11 @@ export const CensoNuevoPage = () => {
       setSuccess(true);
       setTimeout(() => navigate("/dashboard"), 1500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Error al registrar censo");
+      setError(
+        err instanceof Error
+          ? err.message
+          : "No se pudo obtener la ubicacion o registrar el censo",
+      );
     } finally {
       setLoading(false);
     }
@@ -375,7 +443,10 @@ export const CensoNuevoPage = () => {
                   type="number"
                   step="0.000001"
                   value={form.lat}
-                  onChange={(e) => set("lat", e.target.value)}
+                  onChange={(e) => {
+                    setUseGps(false);
+                    set("lat", e.target.value);
+                  }}
                   placeholder="5.5343"
                 />
                 <FormInput
@@ -384,9 +455,37 @@ export const CensoNuevoPage = () => {
                   type="number"
                   step="0.000001"
                   value={form.lon}
-                  onChange={(e) => set("lon", e.target.value)}
+                  onChange={(e) => {
+                    setUseGps(false);
+                    set("lon", e.target.value);
+                  }}
                   placeholder="-73.3678"
                 />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={async () => {
+                    setError("");
+                    setUseGps(true);
+                    try {
+                      await captureCoordinates();
+                    } catch {
+                      setError(
+                        "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
+                      );
+                    }
+                  }}
+                >
+                  Actualizar ubicacion
+                </Button>
+                <span>
+                  {useGps
+                    ? "Usando GPS del dispositivo."
+                    : "Usando coordenadas manuales."}
+                </span>
               </div>
 
               <div className="space-y-2">
