@@ -5,9 +5,11 @@ import { MdAssignmentAdd } from "react-icons/md";
 import { TbMapHeart, TbListSearch } from "react-icons/tb";
 import { Navbar } from "../components/Navbar";
 import { CatAnimation } from "../components/CatAnimation";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
+  const { suscribir, estado } = usePushNotifications();
 
   const menuItems = [
     {
@@ -92,6 +94,27 @@ export const DashboardPage = () => {
               <CatAnimation className="w-96 h-64 md:w-64 md:h-64 drop-shadow-xl" />
             </div>
           </div>
+        </div>
+
+        <div className="mt-4 mb-8 flex justify-center md:justify-start z-10 relative">
+          <button 
+            onClick={suscribir} 
+            disabled={estado === "cargando" || estado === "ok"}
+            className={`px-6 py-3 rounded-xl font-bold text-white shadow-lg transition-all duration-300 flex items-center gap-2 ${
+              estado === "ok" 
+                ? "bg-emerald-500 shadow-emerald-500/30 cursor-default" 
+                : estado === "error"
+                  ? "bg-red-500 hover:bg-red-600 shadow-red-500/30"
+                  : estado === "cargando"
+                    ? "bg-slate-400 cursor-not-allowed"
+                    : "bg-brand-primary hover:bg-brand-secondary hover:-translate-y-1 shadow-brand-primary/30"
+            }`}
+          >
+            {estado === "ok" && <span>✅ Notificaciones activas</span>}
+            {estado === "error" && <span>❌ Error (Reintentar)</span>}
+            {estado === "cargando" && <span>⏳ Activando...</span>}
+            {estado === "idle" && <span>🔔 Activar notificaciones</span>}
+          </button>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
