@@ -9,6 +9,7 @@ import { MascotaNuevaPage } from './pages/MascotaNuevaPage';
 import { CensoNuevoPage } from './pages/CensoNuevoPage';
 import { MascotasPage } from './pages/MascotasPage';
 import { PersonasPage } from './pages/PersonasPage';
+import { MapaPage } from './pages/MapaPage';
 
 function App() {
   return (
@@ -63,6 +64,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <CensoNuevoPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/mapa"
+            element={
+              <ProtectedRoute>
+                <MapaPage />
               </ProtectedRoute>
             }
           />
