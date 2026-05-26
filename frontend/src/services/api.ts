@@ -1,5 +1,6 @@
 import { API_BASE_URL } from '../config';
 import type { LoginRequest, LoginResponse, Persona, Mascota, Censo, CensoDetalle } from '../types';
+import { enqueueRequest } from '../pwa/offlineQueue';
 
 const getAuthHeaders = (): HeadersInit => {
   const token = localStorage.getItem('jwt_token');
@@ -46,19 +47,42 @@ const handleResponse = async <T>(res: Response, url: string): Promise<T> => {
   if (!res.ok) {
     const bodyMessage = await parseErrorBody(res);
     const statusMessage = getStatusMessage(res.status);
-    const detail = bodyMessage ? ` Detalle: ${bodyMessage}` : '';
-    throw new Error(`${statusMessage} (${res.status} ${res.statusText}) en ${url}.${detail}`);
+    const finalMessage = bodyMessage ? bodyMessage : statusMessage;
+    
+    throw new Error(finalMessage);
   }
   return res.json();
 };
 
 const requestJson = async <T>(input: RequestInfo, init?: RequestInit): Promise<T> => {
+  const method = (init?.method ?? 'GET').toUpperCase();
+  const isGet = method === 'GET';
+  const url = typeof input === 'string' ? input : undefined;
+  const body = typeof init?.body === 'string' ? init.body : null;
+
   try {
     const res = await fetch(input, init);
     return await handleResponse<T>(res, typeof input === 'string' ? input : res.url);
   } catch (err: unknown) {
     if (err instanceof Error) {
       if (err.name === 'TypeError') {
+        if (!isGet && url) {
+          await enqueueRequest({
+            url,
+            method,
+            headers: (init?.headers as Record<string, string>) ?? {},
+            body,
+          });
+
+          if (body) {
+            try {
+              return JSON.parse(body) as T;
+            } catch {
+              return {} as T;
+            }
+          }
+          return {} as T;
+        }
         throw new Error('Error de red. Verifica tu conexion y vuelve a intentar.');
       }
       throw err;

@@ -4,7 +4,7 @@ import { MdPets } from "react-icons/md";
 import { MdAssignmentAdd } from "react-icons/md";
 import { TbMapHeart, TbListSearch } from "react-icons/tb";
 import { Navbar } from "../components/Navbar";
-import  { CatAnimation } from "../components/CatAnimation";
+import { CatAnimation } from "../components/CatAnimation";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
@@ -69,19 +69,29 @@ export const DashboardPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
       {/* Decors */}
-      <div className="absolute top-[-15%] left-[-10%] w-[500px] h-[500px] bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
+      <div className="absolute top-[-15%] left-[-10%] w-125 h-125 bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
 
       <Navbar />
 
       {/* Content */}
       <main className="max-w-5xl pt-26 mx-auto px-6 py-10 relative z-15 animate-fade-in flex-1 w-full">
-        <div className="mb-10 ">
-          <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-800 tracking-tight">
-            Panel principal
-          </h1>
-          <p className="text-slate-500 mt-2 font-medium text-lg">
-            ¿Qué te gustaría hacer hoy?
-          </p>
+        <div className="relative  mt-6">
+          <div className="flex flex-col md:flex-row items-center md:items-center ">
+            <div className="text-center md:text-left z-10">
+              <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
+                Panel <span className="text-brand-secondary">principal</span>
+              </h1>
+              <p className="text-slate-500 mt-3 font-medium text-lg md:text-xl max-w-md">
+                ¡Bienvenido! ¿Qué tarea tenemos para hoy?
+              </p>
+              <div className="h-1.5 w-20 bg-brand-secondary rounded-full mt-4 mx-auto md:mx-0 opacity-20" />
+            </div>
+
+            <div className="relative z-0 group md:-mt-12">
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-4 bg-slate-900/10 blur-xl rounded-full" />
+              <CatAnimation className="w-96 h-64 md:w-64 md:h-64 drop-shadow-xl" />
+            </div>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -127,11 +137,6 @@ export const DashboardPage = () => {
               </div>
             </button>
           ))}
-        </div>
-        
-        {/* Decoración del gato animado */}
-        <div className="-mt-10 sm:-mt-12 flex justify-center opacity-80 pointer-events-none">
-          <CatAnimation className="w-96 h-96 sm:w-[450px] sm:h-[450px] drop-shadow-xl" />
         </div>
       </main>
     </div>
