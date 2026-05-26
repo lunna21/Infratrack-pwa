@@ -43,7 +43,7 @@ const parseErrorBody = async (res: Response): Promise<string | null> => {
   }
 };
 
-const handleResponse = async <T>(res: Response, url: string): Promise<T> => {
+const handleResponse = async <T>(res: Response): Promise<T> => {
   if (!res.ok) {
     const bodyMessage = await parseErrorBody(res);
     const statusMessage = getStatusMessage(res.status);
@@ -62,7 +62,7 @@ const requestJson = async <T>(input: RequestInfo, init?: RequestInit): Promise<T
 
   try {
     const res = await fetch(input, init);
-    return await handleResponse<T>(res, typeof input === 'string' ? input : res.url);
+    return await handleResponse<T>(res);
   } catch (err: unknown) {
     if (err instanceof Error) {
       if (err.name === 'TypeError') {
