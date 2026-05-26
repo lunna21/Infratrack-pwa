@@ -75,8 +75,8 @@ export const DashboardPage = () => {
 
       {/* Content */}
       <main className="max-w-5xl pt-26 mx-auto px-6 py-10 relative z-15 animate-fade-in flex-1 w-full">
-        <div className="relative mb-12 mt-6">
-          <div className="flex flex-col md:flex-row items-center md:items-center justify-between gap-6">
+        <div className="relative  mt-6">
+          <div className="flex flex-col md:flex-row items-center md:items-center ">
             <div className="text-center md:text-left z-10">
               <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
                 Panel <span className="text-brand-secondary">principal</span>
@@ -84,17 +84,16 @@ export const DashboardPage = () => {
               <p className="text-slate-500 mt-3 font-medium text-lg md:text-xl max-w-md">
                 ¡Bienvenido! ¿Qué tarea tenemos para hoy?
               </p>
-              {/* Una línea decorativa sutil debajo del texto */}
               <div className="h-1.5 w-20 bg-brand-secondary rounded-full mt-4 mx-auto md:mx-0 opacity-20" />
             </div>
 
-            {/* Contenedor del Gato */}
-            <div className="relative z-0 group mt-6 md:mt-0">
+            <div className="relative z-0 group md:-mt-12">
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-4 bg-slate-900/10 blur-xl rounded-full" />
-              <CatAnimation className="w-64 h-64 md:w-64 md:h-64 drop-shadow-xl" />
+              <CatAnimation className="w-96 h-64 md:w-64 md:h-64 drop-shadow-xl" />
             </div>
           </div>
         </div>
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {menuItems.map((item) => (
             <button
