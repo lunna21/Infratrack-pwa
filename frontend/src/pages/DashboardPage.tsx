@@ -1,13 +1,15 @@
 import { useNavigate } from "react-router-dom";
-import { IoPersonAdd, IoPeople } from "react-icons/io5";
+import { IoPersonAdd, IoPeople, IoNotificationsOutline, IoNotificationsOffOutline } from "react-icons/io5";
 import { MdPets } from "react-icons/md";
 import { MdAssignmentAdd } from "react-icons/md";
 import { TbMapHeart, TbListSearch } from "react-icons/tb";
 import { Navbar } from "../components/Navbar";
 import { CatAnimation } from "../components/CatAnimation";
+import { usePushNotifications } from "../hooks/usePushNotifications";
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
+  const { isSubscribed, subscribe, unsubscribe, loading, error } = usePushNotifications();
 
   const menuItems = [
     {
@@ -138,6 +140,35 @@ export const DashboardPage = () => {
             </button>
           ))}
         </div>
+        
+        {/* Notificaciones */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 mt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4 text-center md:text-left">
+            <div className={`p-4 rounded-2xl ${isSubscribed ? 'bg-brand-primary/10 text-brand-primary' : 'bg-slate-100 text-slate-500'}`}>
+              {isSubscribed ? <IoNotificationsOutline className="w-8 h-8" /> : <IoNotificationsOffOutline className="w-8 h-8" />}
+            </div>
+            <div>
+              <h3 className="text-lg font-bold text-slate-800">Notificaciones Push</h3>
+              <p className="text-sm font-medium text-slate-500">
+                {isSubscribed ? 'Recibiendo notificaciones del sistema' : 'Activar para recibir alertas'}
+              </p>
+            </div>
+          </div>
+          <button
+            disabled={loading}
+            onClick={isSubscribed ? unsubscribe : subscribe}
+            className={`px-6 py-3 rounded-xl font-bold transition-colors shadow-sm ${
+              loading ? 'opacity-50 cursor-not-allowed' : ''
+            } ${
+              isSubscribed 
+                ? 'bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200' 
+                : 'bg-brand-primary text-white hover:bg-brand-primary/90'
+            }`}
+          >
+            {loading ? 'Procesando...' : isSubscribed ? 'Desactivar' : 'Activar'}
+          </button>
+        </div>
+        {error && <p className="text-rose-500 font-medium text-sm mt-3 text-center md:text-right">{error}</p>}
       </main>
     </div>
   );

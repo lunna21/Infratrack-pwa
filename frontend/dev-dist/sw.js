@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-d488705a'], (function (workbox) { 'use strict';
+define(['./workbox-b68364bb'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
@@ -78,12 +78,51 @@ define(['./workbox-d488705a'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "/index.html",
-    "revision": "0.1r2f1odb88o"
+    "revision": "0.91oalt3382g"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/index.html"), {
     allowlist: [/^\/$/]
   }));
+  workbox.registerRoute(({
+    url
+  }) => url.pathname === "/manifest.json", new workbox.CacheFirst({
+    "cacheName": "manifest-cache",
+    plugins: []
+  }), 'GET');
+  workbox.registerRoute(({
+    url
+  }) => url.origin === "https://fonts.googleapis.com", new workbox.StaleWhileRevalidate({
+    "cacheName": "google-fonts-stylesheets",
+    plugins: []
+  }), 'GET');
+  workbox.registerRoute(({
+    url
+  }) => url.origin === "https://fonts.gstatic.com", new workbox.CacheFirst({
+    "cacheName": "google-fonts-webfonts",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 20,
+      maxAgeSeconds: 31536000
+    })]
+  }), 'GET');
+  workbox.registerRoute(({
+    url
+  }) => url.origin === "https://lottie.host", new workbox.CacheFirst({
+    "cacheName": "lottie-files",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 20,
+      maxAgeSeconds: 2592000
+    })]
+  }), 'GET');
+  workbox.registerRoute(({
+    url
+  }) => url.origin === "https://cdn.jsdelivr.net" || url.origin === "https://unpkg.com", new workbox.CacheFirst({
+    "cacheName": "cdn-assets",
+    plugins: [new workbox.ExpirationPlugin({
+      maxEntries: 30,
+      maxAgeSeconds: 2592000
+    })]
+  }), 'GET');
   workbox.registerRoute(({
     url
   }) => url.pathname.startsWith("/api/v1/"), new workbox.NetworkFirst({

@@ -56,6 +56,7 @@ export default defineConfig({
       },
       workbox: {
         navigateFallback: '/index.html',
+        importScripts: ['/sw-push.js'],
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest,wasm}'],
         runtimeCaching: [
           {
