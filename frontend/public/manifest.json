@@ -1,21 +1,21 @@
 {
-	"name": "Censo de Mascotas PWA",
-	"short_name": "Mascotas",
-	"description": "Aplicación para el registro y visualización del censo de mascotas",
+	"name": "Infratrack — Gestión de Construcción",
+	"short_name": "Infratrack",
+	"description": "Plataforma corporativa para la gestión de frentes de obra, personal y maquinaria con captura geolocalizada e IA.",
 	"lang": "es-CO",
 	"dir": "ltr",
 
 	"start_url": "/",
 	"scope": "/",
-	"id": "censo-mascotas-pwa",
+	"id": "infratrack-pwa",
 
 	"display": "standalone",
 	"orientation": "portrait",
 
-	"theme_color": "#B0F0FF",
-	"background_color": "#f8fafc",
+	"theme_color": "#0F172A",
+	"background_color": "#F1F5F9",
 
-	"categories": ["utilities", "education"],
+	"categories": ["business", "productivity", "utilities"],
 
 	"icons": [
 		{

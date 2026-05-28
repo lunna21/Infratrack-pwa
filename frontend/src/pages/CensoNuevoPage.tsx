@@ -2,30 +2,51 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import imageCompression from "browser-image-compression";
 import { useNavigate } from "react-router-dom";
 import { crearCensoApi, getMascotasApi, getPersonasApi } from "../services/api";
-import type { Mascota, Persona } from "../types";
-import { FormInput } from "../components/FormInput";
+import type { Mascota, Persona, TipoMaquinaria } from "../types";
+import { TIPO_MAQUINARIA_LABEL } from "../types";
+import { detectarMaquinaria, type DeteccionMaquinaria } from "../services/roboflow";
 import { FormSelect } from "../components/FormSelect";
 import { Navbar } from "../components/Navbar";
 import { Button } from "../components/Button";
-import { AnimalFootPrint } from "../components/AnimalFootPrint";
+import { useAuth } from "../context/AuthContext";
+import {
+  LuCamera,
+  LuMapPin,
+  LuClock,
+  LuRefreshCw,
+  LuCheck,
+  LuTriangleAlert,
+  LuScan,
+  LuTruck,
+  LuCircleX,
+} from "react-icons/lu";
 
-const COLOR_DEFAULT = "#B0F0FF";
-const PROYECTO_DEFAULT = "PROPWA_004";
+const COLOR_DEFAULT = "#F97316";
+const PROYECTO_DEFAULT = "FRENTE_001";
 
 export const CensoNuevoPage = () => {
   const navigate = useNavigate();
+  const { usuario } = useAuth();
+
   const [mascotas, setMascotas] = useState<Mascota[]>([]);
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
+
   const [cameraActive, setCameraActive] = useState(false);
-  const [facingMode] = useState<"user" | "environment">("user");
   const [photoBytes, setPhotoBytes] = useState<number | null>(null);
-  const [cameraReady, setCameraReady] = useState(false);
   const [videoDevices, setVideoDevices] = useState<MediaDeviceInfo[]>([]);
   const [selectedDeviceId, setSelectedDeviceId] = useState<string>("");
-  const [useGps, setUseGps] = useState(true);
+  const [facingMode] = useState<"user" | "environment">("environment");
+  const [timestamp, setTimestamp] = useState<string>("");
+  const [accuracy, setAccuracy] = useState<number | null>(null);
+
+  // Roboflow
+  const [analyzing, setAnalyzing] = useState(false);
+  const [detecciones, setDetecciones] = useState<DeteccionMaquinaria[]>([]);
+  const [topDeteccion, setTopDeteccion] = useState<DeteccionMaquinaria | null>(null);
+
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
@@ -40,10 +61,11 @@ export const CensoNuevoPage = () => {
   const set = (field: string, value: string) =>
     setForm((f) => ({ ...f, [field]: value }));
 
+  // ------- GPS
   const getCurrentPosition = () =>
     new Promise<GeolocationPosition>((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(new Error("Geolocalizacion no disponible en el navegador."));
+        reject(new Error("Geolocalización no disponible"));
         return;
       }
       navigator.geolocation.getCurrentPosition(resolve, reject, {
@@ -54,182 +76,112 @@ export const CensoNuevoPage = () => {
     });
 
   const captureCoordinates = async () => {
-    const position = await getCurrentPosition();
-    const { latitude, longitude } = position.coords;
-    setForm((current) => ({
-      ...current,
-      lat: latitude.toFixed(6),
-      lon: longitude.toFixed(6),
+    const pos = await getCurrentPosition();
+    setForm((c) => ({
+      ...c,
+      lat: pos.coords.latitude.toFixed(6),
+      lon: pos.coords.longitude.toFixed(6),
     }));
-    return { latitude, longitude };
+    setAccuracy(pos.coords.accuracy);
+    return pos.coords;
   };
 
   useEffect(() => {
-    const initCoords = async () => {
-      setUseGps(true);
-      try {
-        await captureCoordinates();
-        setError("");
-      } catch {
-        setError(
-          "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
-        );
-      }
-    };
-
-    void initCoords();
+    captureCoordinates().catch(() =>
+      setError("No se pudo obtener la ubicación automáticamente."),
+    );
   }, []);
 
-  useEffect(() => {
-    if (!useGps || form.lat || form.lon) return;
-
-    const refreshCoords = async () => {
-      try {
-        await captureCoordinates();
-        setError("");
-      } catch {
-        setError(
-          "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
-        );
-      }
-    };
-
-    void refreshCoords();
-  }, [useGps, form.lat, form.lon]);
-
+  // ------- Datos backend
   useEffect(() => {
     let alive = true;
-
-    const loadData = async () => {
+    (async () => {
       try {
-        const [mascotasData, personasData] = await Promise.all([
-          getMascotasApi(),
-          getPersonasApi(),
-        ]);
+        const [mas, per] = await Promise.all([getMascotasApi(), getPersonasApi()]);
         if (!alive) return;
-        setMascotas(mascotasData);
-        setPersonas(personasData);
-        setForm((current) => ({
-          ...current,
-          idMascota: current.idMascota || mascotasData[0]?.id || "",
-          idDueno: current.idDueno || personasData[0]?.id || "",
+        setMascotas(mas);
+        setPersonas(per);
+        setForm((c) => ({
+          ...c,
+          idMascota: c.idMascota || mas[0]?.id || "",
+          idDueno: c.idDueno || per[0]?.id || "",
         }));
-      } catch (err: unknown) {
+      } catch (err) {
         if (!alive) return;
-        setError(
-          err instanceof Error ? err.message : "No se pudieron cargar datos",
-        );
+        setError(err instanceof Error ? err.message : "No se pudieron cargar datos");
       }
-    };
-
-    void loadData();
-    return () => {
-      alive = false;
-    };
+    })();
+    return () => { alive = false; };
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-        streamRef.current = null;
-      }
-    };
+  // ------- Cámara
+  useEffect(() => () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
   }, []);
 
-  useEffect(() => {
-    const checkPermission = async () => {
-      if (!("permissions" in navigator)) return;
+  const loadVideoDevices = async () => {
+    if (!navigator.mediaDevices?.enumerateDevices) return;
+    const devices = await navigator.mediaDevices.enumerateDevices();
+    const inputs = devices.filter((d) => d.kind === "videoinput");
+    setVideoDevices(inputs);
+    if (!selectedDeviceId && inputs.length > 0) {
+      const back = inputs.find((d) => /back|rear|environment|trasera/i.test(d.label));
+      setSelectedDeviceId((back ?? inputs[0]).deviceId);
+    }
+  };
 
-      try {
-        const status = await navigator.permissions.query({
-          name: "camera" as PermissionName,
-        });
-        if (status.state === "granted") {
-          setCameraReady(true);
-          void startCamera(facingMode);
-        }
-      } catch {
-        // Ignorar si el navegador no soporta este permiso
-      }
-    };
+  const startCamera = async (deviceId?: string) => {
+    try {
+      setError("");
+      streamRef.current?.getTracks().forEach((t) => t.stop());
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setCameraActive(true);
+      await loadVideoDevices();
+    } catch (err) {
+      setCameraActive(false);
+      setError(err instanceof Error ? `Cámara: ${err.message}` : "Cámara no disponible");
+    }
+  };
 
-    void checkPermission();
-  }, [facingMode]);
+  const stopCamera = () => {
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+    setCameraActive(false);
+  };
 
-  const dataUrlBytes = (dataUrl: string): number => {
+  const dataUrlBytes = (dataUrl: string) => {
     const raw = dataUrl.split(",", 2)[1] ?? "";
     const padding = raw.endsWith("==") ? 2 : raw.endsWith("=") ? 1 : 0;
     return Math.floor((raw.length * 3) / 4) - padding;
   };
 
-  const loadVideoDevices = async () => {
-    if (!navigator.mediaDevices?.enumerateDevices) return;
-    const devices = await navigator.mediaDevices.enumerateDevices();
-    const videoInputs = devices.filter(
-      (device) => device.kind === "videoinput",
-    );
-    setVideoDevices(videoInputs);
-    if (!selectedDeviceId && videoInputs.length > 0) {
-      const preferred = videoInputs.find((device) =>
-        /front|user|frontal/i.test(device.label),
-      );
-      setSelectedDeviceId((preferred ?? videoInputs[0]).deviceId);
-    }
-  };
-
-  const startCamera = async (
-    mode: "user" | "environment",
-    deviceId?: string,
-  ) => {
+  const runRoboflow = async (dataUrl: string) => {
+    setAnalyzing(true);
+    setDetecciones([]);
+    setTopDeteccion(null);
     try {
-      setError("");
-      if ("permissions" in navigator) {
-        try {
-          const status = await navigator.permissions.query({
-            name: "camera" as PermissionName,
-          });
-          if (status.state === "denied") {
-            setCameraActive(false);
-            setError("Permiso de cámara denegado. Habilitalo en el navegador.");
-            return;
-          }
-        } catch {
-          // Ignorar si el navegador no soporta este permiso
-        }
-      }
-      if (streamRef.current) {
-        streamRef.current.getTracks().forEach((track) => track.stop());
-      }
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: deviceId
-          ? { deviceId: { exact: deviceId } }
-          : { facingMode: mode },
-        audio: false,
-      });
-      setCameraReady(true);
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      setCameraActive(true);
-      await loadVideoDevices();
-    } catch (err: unknown) {
-      setCameraActive(false);
-      setError(
-        err instanceof Error
-          ? `No se pudo acceder a la cámara: ${err.message}`
-          : "No se pudo acceder a la cámara",
-      );
-    }
-  };
+      const { detecciones: dets } = await detectarMaquinaria(dataUrl);
+      setDetecciones(dets);
+      const top = dets[0] ?? null;
+      setTopDeteccion(top);
 
-  const stopCamera = () => {
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-      streamRef.current = null;
+      // Auto-seleccionar maquinaria del backend si coincide tipo
+      if (top) {
+        const match = mascotas.find((m) => m.tipo === top.tipoInterno);
+        if (match) setForm((c) => ({ ...c, idMascota: match.id }));
+      }
+    } catch (err) {
+      console.warn("[v0] Roboflow error:", err);
+      setError(err instanceof Error ? `Detección IA: ${err.message}` : "Error en IA");
+    } finally {
+      setAnalyzing(false);
     }
-    setCameraActive(false);
   };
 
   const capturePhoto = async () => {
@@ -237,65 +189,59 @@ export const CensoNuevoPage = () => {
     if (!video) return;
 
     const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-    if (!context) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
 
-    const maxBytes = 50 * 1024;
-    const baseWidth = video.videoWidth;
-    const baseHeight = video.videoHeight;
-    canvas.width = baseWidth;
-    canvas.height = baseHeight;
-    context.drawImage(video, 0, 0, baseWidth, baseHeight);
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
 
     try {
-      const rawBlob = await new Promise<Blob>((resolve, reject) => {
+      const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
-          (blob) => (blob ? resolve(blob) : reject(new Error("Sin imagen"))),
+          (b) => (b ? resolve(b) : reject(new Error("Sin imagen"))),
           "image/jpeg",
           0.95,
         );
       });
+      const file = new File([blob], "captura.jpg", { type: "image/jpeg" });
 
-      const rawFile = new File([rawBlob], "captura.jpg", {
-        type: "image/jpeg",
-      });
-
-      const compressedFile = await imageCompression(rawFile, {
+      const compressed = await imageCompression(file, {
         maxSizeMB: 0.05,
         maxWidthOrHeight: 1024,
         useWebWorker: true,
       });
-
-      const dataUrl = await imageCompression.getDataUrlFromFile(
-        compressedFile,
-      );
+      const dataUrl = await imageCompression.getDataUrlFromFile(compressed);
       const bytes = dataUrlBytes(dataUrl);
+      const maxBytes = 50 * 1024;
 
       if (bytes > maxBytes) {
-        setError(
-          "La fotografia supera 50 KB. Acerca la cámara o intenta de nuevo.",
-        );
+        setError("La fotografía supera 50 KB. Vuelve a intentarlo.");
         return;
       }
 
+      const ts = new Date().toISOString();
+      setTimestamp(ts);
       set("fotografia", dataUrl);
       setPhotoBytes(bytes);
       stopCamera();
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? `No se pudo comprimir la foto: ${err.message}`
-          : "No se pudo comprimir la foto",
-      );
+
+      // Refresca GPS al capturar
+      try { await captureCoordinates(); } catch { /* ignore */ }
+
+      // Lanza IA
+      void runRoboflow(dataUrl);
+    } catch (err) {
+      setError(err instanceof Error ? `Compresión: ${err.message}` : "Error en captura");
     }
   };
 
   const mascotaOptions = useMemo(
     () => [
-      { value: "", label: "Selecciona una mascota" },
+      { value: "", label: "Selecciona maquinaria…" },
       ...mascotas.map((m) => ({
         value: m.id,
-        label: `${m.nombre} (${m.tipo})`,
+        label: `${m.nombre} · ${TIPO_MAQUINARIA_LABEL[m.tipo as TipoMaquinaria] ?? m.tipo}`,
       })),
     ],
     [mascotas],
@@ -303,7 +249,7 @@ export const CensoNuevoPage = () => {
 
   const duenoOptions = useMemo(
     () => [
-      { value: "", label: "Selecciona un dueño" },
+      { value: "", label: "Selecciona operador/responsable…" },
       ...personas.map((p) => ({
         value: p.id,
         label: `${p.nombres} ${p.apellidos}`.trim(),
@@ -316,48 +262,31 @@ export const CensoNuevoPage = () => {
     e.preventDefault();
     setError("");
 
-    if (!form.fotografia) {
-      setError("Debes tomar una fotografia con la cámara");
-      return;
-    }
-
-    if (!form.idMascota || !form.idDueno) {
-      setError("Debes seleccionar una mascota y un dueño");
-      return;
-    }
+    if (!form.fotografia) return setError("Toma una fotografía con la cámara.");
+    if (!form.idMascota || !form.idDueno) return setError("Selecciona maquinaria y responsable.");
 
     setLoading(true);
     try {
-      let latNumber = Number(form.lat);
-      let lonNumber = Number(form.lon);
-
-      if (useGps || !form.lat || !form.lon) {
-        const { latitude, longitude } = await captureCoordinates();
-        latNumber = Number(latitude);
-        lonNumber = Number(longitude);
-      }
-
-      if (Number.isNaN(latNumber) || Number.isNaN(lonNumber)) {
-        setError("No se pudo obtener la ubicacion actual");
-        return;
+      let lat = Number(form.lat);
+      let lon = Number(form.lon);
+      if (Number.isNaN(lat) || Number.isNaN(lon)) {
+        const c = await captureCoordinates();
+        lat = c.latitude;
+        lon = c.longitude;
       }
       await crearCensoApi({
         idMascota: form.idMascota,
         idDueno: form.idDueno,
-        fotografia: form.fotografia || "",
-        lat: latNumber,
-        lon: lonNumber,
+        fotografia: form.fotografia,
+        lat,
+        lon,
         idProyecto: PROYECTO_DEFAULT,
         color: COLOR_DEFAULT,
       });
       setSuccess(true);
       setTimeout(() => navigate("/dashboard"), 1500);
-    } catch (err: unknown) {
-      setError(
-        err instanceof Error
-          ? err.message
-          : "No se pudo obtener la ubicacion o registrar el censo",
-      );
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "No se pudo registrar la captura");
     } finally {
       setLoading(false);
     }
@@ -365,21 +294,17 @@ export const CensoNuevoPage = () => {
 
   if (success) {
     return (
-      <div className="login-wrapper relative flex flex-col">
-        {/* Elementos decorativos */}
-        <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
-        <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
+      <div className="min-h-screen bg-slate-50 flex flex-col">
         <Navbar />
-
-        <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
-          <div className="bg-white/90 backdrop-blur-xl rounded-3xl shadow-xl p-10 text-center max-w-sm w-full border border-white/50 animate-slide-up">
-            <div className="text-6xl mb-6 bg-green-100 w-24 h-24 rounded-full flex items-center justify-center mx-auto text-green-500 shadow-inner">
-              📋
+        <main className="flex-1 flex items-center justify-center p-4 pt-20">
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-10 text-center max-w-sm w-full animate-slide-up">
+            <div className="w-16 h-16 mx-auto rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-6">
+              <LuCheck className="w-8 h-8 text-emerald-600" />
             </div>
-            <h2 className="text-2xl font-bold text-slate-800">
-              Censo registrado
+            <h2 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Captura registrada
             </h2>
-            <p className="text-slate-500 font-medium mt-3">
+            <p className="text-slate-500 font-medium mt-3 text-sm">
               Volviendo al panel...
             </p>
           </div>
@@ -389,235 +314,266 @@ export const CensoNuevoPage = () => {
   }
 
   return (
-    <div className="login-wrapper relative flex flex-col">
-      {/* Elementos decorativos */}
-      <div className="absolute top-[20%] right-[-5%] w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"></div>
-      <AnimalFootPrint className="absolute inset-0 w-full h-full z-0 opacity-30 pointer-events-none" />
-
-      <div
-        className="absolute bottom-[10%] left-[-10%] w-96 h-96 bg-indigo-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-70 animate-pulse"
-        style={{ animationDelay: "1.5s" }}
-      ></div>
-
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
-      <main className="flex-1 flex items-center justify-center p-4 relative z-10 w-full">
-        <div className="w-full max-w-xl relative z-10 animate-slide-up">
-          <div className="text-center mb-4">
-            <h1 className="text-3xl font-extrabold mt-16 text-slate-800 tracking-tight">
-              Nuevo censo
+      <main className="flex-1 max-w-6xl mx-auto px-4 sm:px-6 pt-24 pb-12 w-full animate-fade-in">
+        {/* Header */}
+        <header className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <div className="inline-flex items-center gap-2 mb-2 px-2.5 py-1 rounded-md bg-brand-primary text-white text-[10px] font-bold uppercase tracking-[0.18em]">
+              <LuCamera className="w-3 h-3" /> Captura de campo
+            </div>
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+              Reporte de avance — <span className="text-brand-secondary">frente {PROYECTO_DEFAULT}</span>
             </h1>
-            <p className="text-brand-primary mt-1 font-semibold">
-              Asocia mascota y dueño existentes
+            <p className="text-slate-500 font-medium mt-2 max-w-xl">
+              Foto + GPS + timestamp con detección automática de maquinaria mediante IA.
             </p>
           </div>
+          <Button variant="outline" onClick={() => navigate("/dashboard")}>
+            Cancelar
+          </Button>
+        </header>
 
-          <div className="bg-white/85 backdrop-blur-xl rounded-3xl shadow-2xl shadow-indigo-100/50 border border-white/60 p-8 sm:p-10">
-            {error && (
-              <div className="mb-6 p-4 rounded-xl bg-red-50/80 border border-red-100 text-red-600 text-sm font-medium flex items-center gap-2">
-                <span className="text-red-500">⚠️</span>
-                {error}
-              </div>
-            )}
+        {error && (
+          <div className="mt-6 p-3.5 rounded-lg bg-red-50 border border-red-200 text-red-700 text-sm font-medium flex items-center gap-2">
+            <LuTriangleAlert className="w-4 h-4 shrink-0" />
+            {error}
+          </div>
+        )}
 
-            <form onSubmit={handleSubmit} className="space-y-4 animate-fade-in">
-              <FormSelect
-                label="Mascota"
-                required
-                value={form.idMascota}
-                onChange={(e) => set("idMascota", e.target.value)}
-                options={mascotaOptions}
-              />
-
-              <FormSelect
-                label="Dueño"
-                required
-                value={form.idDueno}
-                onChange={(e) => set("idDueno", e.target.value)}
-                options={duenoOptions}
-              />
-
-              <div className="grid grid-cols-2 gap-3">
-                <FormInput
-                  label="Latitud"
-                  required
-                  type="number"
-                  step="0.000001"
-                  value={form.lat}
-                  onChange={(e) => {
-                    setUseGps(false);
-                    set("lat", e.target.value);
-                  }}
-                  placeholder="5.5343"
-                />
-                <FormInput
-                  label="Longitud"
-                  required
-                  type="number"
-                  step="0.000001"
-                  value={form.lon}
-                  onChange={(e) => {
-                    setUseGps(false);
-                    set("lon", e.target.value);
-                  }}
-                  placeholder="-73.3678"
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={async () => {
-                    setError("");
-                    setUseGps(true);
-                    try {
-                      await captureCoordinates();
-                    } catch {
-                      setError(
-                        "No se pudo obtener la ubicacion automaticamente. Puedes escribirla.",
-                      );
-                    }
-                  }}
-                >
-                  Actualizar ubicacion
-                </Button>
-                <span>
-                  {useGps
-                    ? "Usando GPS del dispositivo."
-                    : "Usando coordenadas manuales."}
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6">
+          {/* Cámara / preview */}
+          <section className="lg:col-span-3 corp-card overflow-hidden">
+            <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h2 className="font-bold text-slate-900 flex items-center gap-2">
+                <LuCamera className="w-4 h-4 text-brand-primary" />
+                Evidencia fotográfica
+              </h2>
+              {form.fotografia && photoBytes && (
+                <span className="text-xs font-mono text-slate-500">
+                  {(photoBytes / 1024).toFixed(1)} KB
                 </span>
-              </div>
+              )}
+            </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-medium text-gray-700">
-                  Fotografía *
-                </label>
-
-                {!form.fotografia && (
-                  <div className="rounded-lg border border-gray-200 p-3">
-                    <div className="flex flex-wrap gap-2">
-                      {!cameraActive && (
-                        <Button
-                          type="button"
-                          variant="primary"
-                          onClick={() =>
-                            startCamera(
-                              facingMode,
-                              selectedDeviceId || undefined,
-                            )
-                          }
-                        >
-                          Activar cámara
-                        </Button>
-                      )}
-                      {videoDevices.length > 1 && (
-                        <FormSelect
-                          label="Camara"
-                          value={selectedDeviceId}
-                          onChange={(e) => {
-                            const nextId = e.target.value;
-                            setSelectedDeviceId(nextId);
-                            if (cameraActive) {
-                              void startCamera(facingMode, nextId);
-                            }
-                          }}
-                          options={videoDevices.map((device) => ({
-                            value: device.deviceId,
-                            label: device.label || "Camara",
-                          }))}
-                          labelClassName="block text-xs font-medium text-gray-700"
-                          selectClassName="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      )}
+            <div className="p-5">
+              {!form.fotografia && !cameraActive && (
+                <div className="aspect-video w-full rounded-xl bg-slate-900 border border-slate-200 flex flex-col items-center justify-center gap-4 text-white">
+                  <LuCamera className="w-10 h-10 opacity-60" />
+                  <p className="text-sm font-semibold opacity-90">Activa la cámara para capturar</p>
+                  <Button type="button" variant="primary" onClick={() => startCamera(selectedDeviceId || undefined)}>
+                    Activar cámara
+                  </Button>
+                  {videoDevices.length > 1 && (
+                    <div className="w-full max-w-xs px-4">
+                      <FormSelect
+                        label="Cámara"
+                        value={selectedDeviceId}
+                        onChange={(e) => setSelectedDeviceId(e.target.value)}
+                        options={videoDevices.map((d) => ({ value: d.deviceId, label: d.label || "Cámara" }))}
+                        labelClassName="block text-[10px] font-bold uppercase tracking-wider text-white/70 mb-1"
+                        selectClassName="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md text-sm text-white"
+                      />
                     </div>
+                  )}
+                </div>
+              )}
 
-                    {!cameraActive && (
-                      <p className="text-xs text-gray-500 mt-2">
-                        {cameraReady
-                          ? "La cámara ya fue autorizada. Activa para previsualizar."
-                          : "Se solicitará permiso de cámara si aún no esta autorizado."}
-                      </p>
-                    )}
+              {cameraActive && (
+                <div className="space-y-3">
+                  <div className="relative rounded-xl overflow-hidden bg-slate-900 border border-slate-200">
+                    <video ref={videoRef} autoPlay playsInline className="w-full aspect-video object-cover" />
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-md bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> En vivo
+                    </div>
+                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-xs font-mono">
+                      <span className="px-2 py-1 rounded bg-black/50 backdrop-blur">
+                        {form.lat && form.lon ? `${form.lat}, ${form.lon}` : "GPS…"}
+                      </span>
+                      <span className="px-2 py-1 rounded bg-black/50 backdrop-blur">
+                        {new Date().toLocaleTimeString("es-CO")}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="primary" fullWidth onClick={capturePhoto}>
+                      <LuCamera className="w-4 h-4 mr-2" /> Capturar foto
+                    </Button>
+                    <Button type="button" variant="outline" onClick={stopCamera}>
+                      <LuCircleX className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
 
-                    {cameraActive && (
-                      <div className="mt-3 space-y-2">
-                        <video
-                          ref={videoRef}
-                          autoPlay
-                          playsInline
-                          className="w-full rounded-lg border border-gray-200"
-                        />
-                        <div className="flex gap-2">
-                          <Button
-                            type="button"
-                            variant="primary"
-                            onClick={capturePhoto}
-                          >
-                            Tomar foto
-                          </Button>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={stopCamera}
-                          >
-                            Cancelar
-                          </Button>
-                        </div>
+              {form.fotografia && (
+                <div className="space-y-3">
+                  <div className="relative rounded-xl overflow-hidden border border-slate-200">
+                    <img src={form.fotografia || "/placeholder.svg"} alt="Captura de campo" className="w-full aspect-video object-cover" />
+                    <div className="absolute top-3 left-3 flex items-center gap-1.5 px-2 py-1 rounded-md bg-emerald-600 text-white text-[10px] font-bold uppercase tracking-wider">
+                      <LuCheck className="w-3 h-3" /> Capturado
+                    </div>
+                    {timestamp && (
+                      <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-[11px] font-mono">
+                        <span className="px-2 py-1 rounded bg-black/60 backdrop-blur flex items-center gap-1.5">
+                          <LuMapPin className="w-3 h-3" /> {form.lat}, {form.lon}
+                        </span>
+                        <span className="px-2 py-1 rounded bg-black/60 backdrop-blur flex items-center gap-1.5">
+                          <LuClock className="w-3 h-3" /> {new Date(timestamp).toLocaleTimeString("es-CO")}
+                        </span>
                       </div>
                     )}
                   </div>
-                )}
-
-                {form.fotografia && (
-                  <div className="rounded-lg border border-gray-200 p-3 space-y-2">
-                    <img
-                      src={form.fotografia}
-                      alt="Fotografía capturada"
-                      className="w-full rounded-lg border border-gray-200"
-                    />
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>
-                        Tamano:{" "}
-                        {photoBytes
-                          ? `${(photoBytes / 1024).toFixed(1)} KB`
-                          : "N/A"}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          set("fotografia", "");
-                          setPhotoBytes(null);
-                        }}
-                        className="text-blue-600 hover:underline"
-                      >
-                        Tomar otra
-                      </button>
-                    </div>
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => {
+                        set("fotografia", "");
+                        setPhotoBytes(null);
+                        setDetecciones([]);
+                        setTopDeteccion(null);
+                      }}
+                    >
+                      <LuRefreshCw className="w-4 h-4 mr-2" /> Tomar otra
+                    </Button>
                   </div>
-                )}
+                </div>
+              )}
+
+              {/* Resultado IA */}
+              {(analyzing || detecciones.length > 0 || topDeteccion) && form.fotografia && (
+                <div className="mt-5 p-4 rounded-xl bg-slate-900 text-white">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-bold flex items-center gap-2">
+                      <LuScan className={`w-4 h-4 ${analyzing ? "animate-pulse text-brand-primary" : "text-brand-primary"}`} />
+                      Detección IA — Roboflow
+                    </h3>
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      {analyzing ? "Analizando…" : `${detecciones.length} resultado(s)`}
+                    </span>
+                  </div>
+
+                  {analyzing && (
+                    <div className="h-2 bg-slate-800 rounded-full overflow-hidden">
+                      <div className="h-full w-1/2 bg-brand-primary animate-pulse rounded-full" />
+                    </div>
+                  )}
+
+                  {!analyzing && topDeteccion && (
+                    <div className="flex items-center gap-3 p-3 rounded-lg bg-slate-800 border border-slate-700 mb-2">
+                      <div className="w-10 h-10 rounded-md bg-brand-primary text-white flex items-center justify-center">
+                        <LuTruck className="w-5 h-5" />
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-sm font-bold">
+                          {TIPO_MAQUINARIA_LABEL[topDeteccion.tipoInterno]}
+                        </p>
+                        <p className="text-[11px] font-mono text-slate-400">
+                          {topDeteccion.clase} · confianza {(topDeteccion.confianza * 100).toFixed(1)}%
+                        </p>
+                      </div>
+                      <div className="text-right">
+                        <div className="text-2xl font-black font-mono text-brand-primary">
+                          {(topDeteccion.confianza * 100).toFixed(0)}<span className="text-sm">%</span>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {!analyzing && detecciones.length === 0 && (
+                    <p className="text-xs text-slate-400 font-medium">
+                      No se detectó maquinaria. Selecciona el equipo manualmente.
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+          </section>
+
+          {/* Form lateral */}
+          <section className="lg:col-span-2 space-y-5">
+            {/* Metadata GPS */}
+            <div className="corp-card p-5">
+              <h2 className="font-bold text-slate-900 flex items-center gap-2 mb-4">
+                <LuMapPin className="w-4 h-4 text-brand-primary" /> Geolocalización
+              </h2>
+              <div className="grid grid-cols-2 gap-3 mb-3">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Latitud</p>
+                  <p className="font-mono text-sm font-bold text-slate-900">{form.lat || "—"}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500 mb-1">Longitud</p>
+                  <p className="font-mono text-sm font-bold text-slate-900">{form.lon || "—"}</p>
+                </div>
+              </div>
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500 font-medium">
+                  Precisión: <span className="font-mono font-bold text-slate-700">{accuracy ? `${accuracy.toFixed(0)} m` : "—"}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => captureCoordinates().catch(() => setError("GPS no disponible"))}
+                  className="inline-flex items-center gap-1 text-brand-primary font-bold hover:text-brand-hover"
+                >
+                  <LuRefreshCw className="w-3 h-3" /> Actualizar
+                </button>
+              </div>
+            </div>
+
+            {/* Asociaciones */}
+            <div className="corp-card p-5 space-y-4">
+              <h2 className="font-bold text-slate-900">Detalles del registro</h2>
+
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                  Maquinaria *
+                </label>
+                <FormSelect
+                  label=""
+                  required
+                  value={form.idMascota}
+                  onChange={(e) => set("idMascota", e.target.value)}
+                  options={mascotaOptions}
+                  labelClassName="hidden"
+                  selectClassName="login-input"
+                />
               </div>
 
-              <div className="flex gap-4 pt-4">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => navigate("/dashboard")}
-                  fullWidth
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  variant="primary"
-                  disabled={loading}
-                  fullWidth
-                >
-                  {loading ? "Guardando..." : "Registrar"}
-                </Button>
+              <div>
+                <label className="block text-[10px] font-bold uppercase tracking-wider text-slate-600 mb-1.5">
+                  Operador / responsable *
+                </label>
+                <FormSelect
+                  label=""
+                  required
+                  value={form.idDueno}
+                  onChange={(e) => set("idDueno", e.target.value)}
+                  options={duenoOptions}
+                  labelClassName="hidden"
+                  selectClassName="login-input"
+                />
               </div>
-            </form>
-          </div>
-        </div>
+
+              <div className="pt-2 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Frente</p>
+                  <p className="font-mono font-bold text-slate-900">{PROYECTO_DEFAULT}</p>
+                </div>
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Capturado por</p>
+                  <p className="font-bold text-slate-900 truncate">{usuario || "—"}</p>
+                </div>
+              </div>
+            </div>
+
+            <Button type="submit" variant="primary" fullWidth disabled={loading || !form.fotografia} isLoading={loading}>
+              Registrar captura en obra
+            </Button>
+          </section>
+        </form>
       </main>
     </div>
   );

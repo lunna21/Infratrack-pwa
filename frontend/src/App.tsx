@@ -10,6 +10,7 @@ import { CensoNuevoPage } from './pages/CensoNuevoPage';
 import { MascotasPage } from './pages/MascotasPage';
 import { PersonasPage } from './pages/PersonasPage';
 import { MapaPage } from './pages/MapaPage';
+import { ReportesPage } from './pages/ReportesPage';
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
           <Route path="/" element={<Navigate to="/login" replace />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/registro" element={<RegistroPage />} />
+
           <Route
             path="/dashboard"
             element={
@@ -27,46 +29,54 @@ function App() {
               </ProtectedRoute>
             }
           />
+
+          {/* Personal — sólo Gerente */}
           <Route
-            path="/personas/nueva"
+            path="/personal/nuevo"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["GERENTE"]}>
                 <PersonaNuevaPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/personas"
+            path="/personal"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["GERENTE"]}>
                 <PersonasPage />
               </ProtectedRoute>
             }
           />
+
+          {/* Maquinaria — sólo Gerente */}
           <Route
-            path="/mascotas/nueva"
+            path="/maquinaria/nueva"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["GERENTE"]}>
                 <MascotaNuevaPage />
               </ProtectedRoute>
             }
           />
           <Route
-            path="/mascotas"
+            path="/maquinaria"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute roles={["GERENTE"]}>
                 <MascotasPage />
               </ProtectedRoute>
             }
           />
+
+          {/* Captura de campo — todos los roles */}
           <Route
-            path="/censo/nuevo"
+            path="/campo/nuevo"
             element={
               <ProtectedRoute>
                 <CensoNuevoPage />
               </ProtectedRoute>
             }
           />
+
+          {/* Mapa */}
           <Route
             path="/mapa"
             element={
@@ -75,7 +85,17 @@ function App() {
               </ProtectedRoute>
             }
           />
-          {/* Próximas rutas (las iremos agregando) */}
+
+          {/* Reportes — sólo Gerente */}
+          <Route
+            path="/reportes"
+            element={
+              <ProtectedRoute roles={["GERENTE"]}>
+                <ReportesPage />
+              </ProtectedRoute>
+            }
+          />
+
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </BrowserRouter>

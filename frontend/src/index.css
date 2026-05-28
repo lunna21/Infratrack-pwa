@@ -1,93 +1,101 @@
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap');
 
 @import "tailwindcss";
 
-
-
 @theme {
-  --color-brand-light: #B0F0FF;
-  --color-brand-primary: #4bb8d4;
-  --color-brand-secondary: #2f8fc2;
-  --color-brand-hover: #2679a8;
-  --color-brand-dark: #0b3c5d;
-  --color-brand-dark-muted: #1a5a7a;
-  --color-success: #22c55e;
-  --color-warning: #f59e0b;
-  --color-danger: #ef4444;
-  --color-danger-hover: #dc2626;
+  --color-brand-primary: #F97316;       /* Safety orange */
+  --color-brand-secondary: #EA580C;     /* Deep orange */
+  --color-brand-hover: #C2410C;
+  --color-brand-dark: #0F172A;          /* Slate 900 */
+  --color-brand-dark-muted: #1E293B;
+  --color-brand-light: #FFF7ED;         /* Warm tint */
+  --color-brand-accent: #FACC15;        /* Caution yellow accent */
+  --color-surface: #FFFFFF;
+  --color-surface-muted: #F8FAFC;
+  --color-border-subtle: #E2E8F0;
+  --color-success: #16A34A;
+  --color-warning: #F59E0B;
+  --color-danger: #DC2626;
+  --color-danger-hover: #B91C1C;
 }
 
 @layer base {
   body {
-    font-family: 'Plus Jakarta Sans', sans-serif;
-    background-color: #f8fafc;
-    color: #0f172a;
+    font-family: 'Inter', sans-serif;
+    background-color: #F1F5F9;
+    color: #0F172A;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-mono {
+    font-family: 'JetBrains Mono', monospace;
   }
 }
 
 @layer components {
-  /* Contenedores de Login */
+  /* Login corporativo */
   .login-wrapper {
-    @apply min-h-screen bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-50 via-white to-blue-50 flex items-center justify-center p-4 relative overflow-hidden;
+    @apply min-h-screen bg-slate-50 flex items-center justify-center p-4 relative overflow-hidden;
   }
   .login-card {
-    @apply w-full max-w-5xl relative z-10 flex flex-col md:flex-row bg-white rounded-[2.5rem] shadow-[0_20px_50px_-12px_rgba(0,0,0,0.1)] overflow-hidden min-h-[75vh];
+    @apply w-full max-w-6xl relative z-10 flex flex-col md:flex-row bg-white rounded-3xl shadow-[0_20px_60px_-20px_rgba(15,23,42,0.25)] overflow-hidden min-h-[640px] border border-slate-200;
   }
   .login-banner {
-    @apply hidden md:flex md:w-1/2 relative bg-gradient-to-br from-[#ffffff] via-[#97e1ea] to-[#ffffff] items-center justify-center overflow-hidden p-10 flex-col;
+    @apply hidden md:flex md:w-1/2 relative bg-slate-900 items-center justify-center overflow-hidden p-12 flex-col;
   }
-  
-  /* Elementos de formulario */
   .login-input {
-    @apply w-full px-5 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-light focus:border-brand-light focus:bg-white transition-all duration-200;
+    @apply w-full px-4 py-3 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-primary/40 focus:border-brand-primary transition-all duration-150;
   }
-  .login-btn {
-    @apply w-full bg-gradient-to-r from-brand-secondary to-brand-hover hover:from-brand-hover hover:to-brand-dark disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-4 rounded-full text-sm shadow-[0_8px_20px_-6px_rgba(47,143,194,0.4)] transform hover:-translate-y-0.5 active:scale-[0.98] transition-all duration-200 mt-4;
-  }
-
-.login-link {
-  @apply text-brand-secondary font-bold  hover:text-brand-dark transition-all;
-}  
-
-  /* Efectos visuales de fondo y Glassmorphism */
-  .glass-panel {
-    @apply relative z-10 bg-white/40 p-10 rounded-[2.5rem] border border-white/60 backdrop-blur-xl w-full max-w-2xl shadow-[0_8px_32px_rgba(0,0,0,0.05)] text-center;
-  }
-  .mascot-container {
-    @apply relative top-2 z-10 w-80 h-80 lg:w-80 lg:h-80 drop-shadow-[0_20px_25px_rgba(11,60,93,0.2)] flex items-center justify-center mb-8;
+  .login-link {
+    @apply text-brand-primary font-bold hover:text-brand-hover transition-colors;
   }
 
   /* Botones */
   .btn {
-    @apply inline-flex items-center justify-center font-bold px-6 py-4 rounded-full text-sm transition-all duration-200;
+    @apply inline-flex items-center justify-center font-semibold px-5 py-2.5 rounded-lg text-sm transition-all duration-150 tracking-tight;
   }
   .btn:active {
     @apply scale-[0.98];
   }
   .btn:disabled {
-    @apply opacity-60 cursor-not-allowed transform-none;
+    @apply opacity-60 cursor-not-allowed;
   }
-  
   .btn-primary {
-    @apply bg-gradient-to-r from-brand-secondary to-brand-hover hover:from-brand-hover hover:to-brand-dark text-white shadow-[0_8px_20px_-6px_rgba(47,143,194,0.4)] hover:-translate-y-0.5;
+    @apply bg-brand-primary hover:bg-brand-hover text-white shadow-sm shadow-orange-500/30;
   }
-  
   .btn-secondary {
-    @apply bg-brand-dark hover:bg-brand-dark-muted text-white shadow-md hover:-translate-y-0.5;
+    @apply bg-slate-900 hover:bg-slate-700 text-white shadow-sm;
   }
-
   .btn-outline {
-    @apply bg-transparent border-2 border-brand-secondary text-brand-secondary hover:bg-brand-secondary hover:text-white;
+    @apply bg-white border border-slate-300 text-slate-700 hover:bg-slate-50 hover:border-slate-400;
   }
 
+  /* Cards corporativas */
+  .corp-card {
+    @apply bg-white rounded-xl border border-slate-200 shadow-sm;
+  }
+  .corp-stat {
+    @apply bg-white rounded-xl border border-slate-200 p-5;
+  }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: fadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   }
   .animate-slide-up {
-    animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  }
+  .bg-grid {
+    background-image:
+      linear-gradient(rgba(15,23,42,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(15,23,42,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
+  }
+  .bg-grid-dark {
+    background-image:
+      linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
+    background-size: 32px 32px;
   }
 }
 
@@ -97,6 +105,6 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
