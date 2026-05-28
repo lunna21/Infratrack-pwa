@@ -19,7 +19,7 @@ MAX_FOTO_BYTES = 50 * 1024  # 50 KB
 
 class CensoCreate(BaseModel):
     """DTO para crear un censo. Valida tamaño de imagen Base64."""
-    id: UUID
+    id: UUID | None = None
     id_mascota: UUID
     id_dueno: UUID
     fotografia: str | None = None
