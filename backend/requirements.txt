@@ -9,3 +9,4 @@ pydantic-settings==2.9.1
 python-dotenv==1.1.0
 python-multipart==0.0.20
 httpx==0.28.1
+inference-sdk==0.9.17
