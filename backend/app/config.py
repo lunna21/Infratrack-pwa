@@ -17,6 +17,12 @@ class Settings(BaseSettings):
     JWT_ALGORITHM: str = "HS256"
     JWT_EXPIRE_MINUTES: int = 60
 
+    # ── Roboflow (detección de maquinaria) ─────────────────────
+    ROBOFLOW_API_KEY: str = ""
+    ROBOFLOW_WORKFLOW_URL: str = (
+        "https://serverless.roboflow.com/infer/workflows/lunna-sosa/general-segmentation-api-5"
+    )
+
     # ── CORS ───────────────────────────────────────────────────
     CORS_ORIGINS: str = '["http://localhost:5173","http://localhost:3000"]'
 
