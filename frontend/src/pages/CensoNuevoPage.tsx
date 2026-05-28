@@ -188,15 +188,43 @@ export const CensoNuevoPage = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-
     try {
+      // Espera a que el video tenga datos y dimensiones reales antes de capturar.
+      // Sin esto, videoWidth/videoHeight pueden ser 0 y toBlob devuelve null ("Sin imagen").
+      if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error("La cámara aún no está lista, intenta de nuevo")),
+            3000,
+          );
+          const onReady = () => {
+            if (video.videoWidth && video.videoHeight) {
+              clearTimeout(timeout);
+              video.removeEventListener("loadeddata", onReady);
+              resolve();
+            }
+          };
+          video.addEventListener("loadeddata", onReady);
+          onReady();
+        });
+      }
+
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      if (!width || !height) {
+        throw new Error("La cámara no entregó imagen, intenta de nuevo");
+      }
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("No se pudo preparar el lienzo de captura");
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(video, 0, 0, width, height);
+
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("Sin imagen"))),
