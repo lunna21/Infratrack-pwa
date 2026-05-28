@@ -4,9 +4,12 @@
  * Clases: Excavator, Bull_dozer, Dumb_truck
  */
 import { ROBOFLOW_TO_TIPO, type TipoMaquinaria } from '../types';
+import { API_BASE_URL } from '../config';
 
-const ROBOFLOW_API_URL = 'https://serverless.roboflow.com/infer/workflows/lunna-sosa/general-segmentation-api-5';
-const API_KEY = import.meta.env.VITE_ROBOFLOW_API_KEY as string | undefined;
+// Se llama al backend (proxy) en lugar de a Roboflow directamente.
+// Esto evita el bloqueo CORS del endpoint de workflows y mantiene la API key
+// del lado del servidor en vez de exponerla en el bundle del navegador.
+const DETECCION_API_URL = `${API_BASE_URL}/deteccion/maquinaria`;
 
 export interface DeteccionMaquinaria {
   clase: string;
@@ -56,30 +59,27 @@ const extraerPredicciones = (raw: unknown): RoboflowPrediction[] => {
 export const detectarMaquinaria = async (
   fotografiaDataUrl: string,
 ): Promise<ResultadoDeteccion> => {
-  if (!API_KEY) {
-    throw new Error('VITE_ROBOFLOW_API_KEY no está configurada.');
-  }
-
   const base64 = stripBase64Prefix(fotografiaDataUrl);
 
   const body = {
-    api_key: API_KEY,
-    inputs: {
-      image: { type: 'base64', value: base64 },
-      classes: 'Excavator, Bull_dozer, Dumb_truck',
-    },
-    use_cache: true,
+    imagen_base64: base64,
+    classes: 'Excavator, Bull_dozer, Dumb_truck',
   };
 
-  const res = await fetch(ROBOFLOW_API_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
+  let res: Response;
+  try {
+    res = await fetch(DETECCION_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error('No se pudo conectar con el servidor de detección. Verifica tu conexión.');
+  }
 
   if (!res.ok) {
     const text = await res.text().catch(() => '');
-    throw new Error(`Roboflow respondió ${res.status}: ${text || 'error desconocido'}`);
+    throw new Error(`El servidor de detección respondió ${res.status}: ${text || 'error desconocido'}`);
   }
 
   const raw = await res.json();
