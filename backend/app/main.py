@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from .config import settings
 from .database import engine, Base
 from .models import Persona, Mascota, Censo  # noqa: F401  — registrar modelos
-from .routers import auth, personas, mascotas, censos
+from .routers import auth, personas, mascotas, censos, deteccion
 
 
 # ── Lifespan: crear tablas al iniciar ─────────────────────────
@@ -44,6 +44,7 @@ app.include_router(auth.router, prefix=API_PREFIX)
 app.include_router(personas.router, prefix=API_PREFIX)
 app.include_router(mascotas.router, prefix=API_PREFIX)
 app.include_router(censos.router, prefix=API_PREFIX)
+app.include_router(deteccion.router, prefix=API_PREFIX)
 
 
 # ── Health check ───────────────────────────────────────────────
