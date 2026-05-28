@@ -41,18 +41,18 @@ async def detectar_maquinaria(body: DeteccionRequest):
 
     base64_image = _strip_base64_prefix(body.imagen_base64)
 
-    payload = {
-        "api_key": settings.ROBOFLOW_API_KEY,
-        "inputs": {
-            "image": {"type": "base64", "value": base64_image},
-            "classes": body.classes,
-        },
-        "use_cache": True,
-    }
+    # Endpoint directo de Inferencia para el modelo alojado en Roboflow
+    model_id = "excavators-cwlh0/5"
+    url = f"https://detect.roboflow.com/{model_id}"
 
     try:
         async with httpx.AsyncClient(timeout=60.0) as client:
-            resp = await client.post(settings.ROBOFLOW_WORKFLOW_URL, json=payload)
+            resp = await client.post(
+                url,
+                params={"api_key": settings.ROBOFLOW_API_KEY},
+                data=base64_image,  # La imagen base64 se envía directamente en el body
+                headers={"Content-Type": "application/x-www-form-urlencoded"}
+            )
     except httpx.RequestError as exc:
         raise HTTPException(
             status_code=status.HTTP_502_BAD_GATEWAY,
