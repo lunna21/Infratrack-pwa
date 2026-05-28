@@ -47,7 +47,7 @@ const createUserIcon = () =>
   L.divIcon({
     className: "",
     html: `
-      <div style="display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9999px; background:linear-gradient(135deg,#4bb8d4,#2679a8); border:3px solid white; box-shadow:0 10px 18px rgba(47,143,194,.3); color:white; font-size:16px;">
+      <div style="display:flex; align-items:center; justify-content:center; width:34px; height:34px; border-radius:9999px; background:#F97316; border:3px solid white; box-shadow:0 10px 18px rgba(249,115,22,.35); color:white; font-size:16px;">
         <span>•</span>
       </div>
     `,
@@ -62,18 +62,18 @@ const getPopupContent = (censo: CensoDetalle) => {
     : "";
 
   return `
-    <div style="min-width:220px;max-width:300px;font-family: 'Plus Jakarta Sans', sans-serif;">
-      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px;">
+    <div style="min-width:240px;max-width:320px;font-family: 'Inter', system-ui, sans-serif;">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px;">
         <div>
-          <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#64748b;font-weight:700;">Censo</div>
+          <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#64748b;font-weight:700;">Registro de campo</div>
           <div style="font-size:16px;font-weight:800;color:#0f172a;line-height:1.15;">${escapeHtml(censo.mascota.nombre)}</div>
         </div>
-        <span style="padding:6px 10px;border-radius:9999px;background:${escapeHtml(censo.color)}22;color:#0f172a;font-size:11px;font-weight:700;">${escapeHtml(censo.mascota.tipo)}</span>
+        <span style="padding:6px 10px;border-radius:6px;background:${escapeHtml(censo.color)}22;color:#0f172a;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">${escapeHtml(censo.mascota.tipo)}</span>
       </div>
       <div style="display:grid;gap:6px;color:#334155;font-size:13px;line-height:1.35;">
-        <div><strong>Dueño:</strong> ${escapeHtml(`${censo.dueno.nombres} ${censo.dueno.apellidos}`.trim())}</div>
-        <div><strong>Teléfono:</strong> ${escapeHtml(censo.dueno.telefono)}</div>
-        <div><strong>Proyecto:</strong> ${escapeHtml(censo.idProyecto)}</div>
+        <div><strong>Responsable:</strong> ${escapeHtml(`${censo.dueno.nombres} ${censo.dueno.apellidos}`.trim())}</div>
+        <div><strong>Contacto:</strong> ${escapeHtml(censo.dueno.telefono)}</div>
+        <div><strong>Frente / Proyecto:</strong> ${escapeHtml(censo.idProyecto)}</div>
         <div><strong>Coordenadas:</strong> ${censo.lat.toFixed(6)}, ${censo.lon.toFixed(6)}</div>
       </div>
       ${photo}
