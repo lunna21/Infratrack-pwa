@@ -120,6 +120,14 @@ export const CensoNuevoPage = () => {
     streamRef.current = null;
   }, []);
 
+  // Adjunta el stream al <video> cuando este se monta (solo existe si cameraActive).
+  useEffect(() => {
+    if (cameraActive && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+      videoRef.current.play().catch(() => { /* autoplay lo gestiona el atributo */ });
+    }
+  }, [cameraActive]);
+
   const loadVideoDevices = async () => {
     if (!navigator.mediaDevices?.enumerateDevices) return;
     const devices = await navigator.mediaDevices.enumerateDevices();
@@ -131,27 +139,72 @@ export const CensoNuevoPage = () => {
     }
   };
 
-  const startCamera = async (deviceId?: string) => {
-    try {
-      setError("");
-      streamRef.current?.getTracks().forEach((t) => t.stop());
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: deviceId ? { deviceId: { exact: deviceId } } : { facingMode },
-        audio: false,
-      });
-      streamRef.current = stream;
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      setCameraActive(true);
-      await loadVideoDevices();
-    } catch (err) {
-      setCameraActive(false);
-      setError(err instanceof Error ? `Cámara: ${err.message}` : "Cámara no disponible");
+  const traducirErrorCamara = (err: unknown): string => {
+    if (!(err instanceof Error)) return "Cámara no disponible";
+    switch (err.name) {
+      case "NotReadableError":
+      case "TrackStartError":
+        return "La cámara está en uso por otra app o pestaña. Ciérrala e intenta de nuevo.";
+      case "NotAllowedError":
+      case "SecurityError":
+        return "Permiso de cámara denegado. Habilítalo en los ajustes del navegador.";
+      case "NotFoundError":
+      case "DevicesNotFoundError":
+        return "No se encontró ninguna cámara en este dispositivo.";
+      case "OverconstrainedError":
+        return "La cámara seleccionada no está disponible.";
+      default:
+        return `Cámara: ${err.message}`;
     }
+  };
+
+  const startCamera = async (deviceId?: string) => {
+    setError("");
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraActive(false);
+      setError("Este navegador no permite acceso a la cámara. Usa HTTPS y un navegador compatible.");
+      return;
+    }
+
+    // Detén cualquier stream previo para liberar la cámara antes de reabrir.
+    streamRef.current?.getTracks().forEach((t) => t.stop());
+    streamRef.current = null;
+
+    // Intenta varias configuraciones, de la más específica a la más genérica.
+    const intentos: MediaStreamConstraints[] = [];
+    if (deviceId) intentos.push({ video: { deviceId: { exact: deviceId } }, audio: false });
+    intentos.push({ video: { facingMode: { ideal: facingMode } }, audio: false });
+    intentos.push({ video: true, audio: false });
+
+    let lastErr: unknown = null;
+    for (const constraints of intentos) {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = stream;
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play().catch(() => { /* autoplay */ });
+        }
+        setCameraActive(true);
+        await loadVideoDevices();
+        return;
+      } catch (err) {
+        lastErr = err;
+        // Si es un problema de permisos o hardware ocupado, no tiene sentido reintentar.
+        if (err instanceof Error && (err.name === "NotAllowedError" || err.name === "NotReadableError")) {
+          break;
+        }
+      }
+    }
+
+    setCameraActive(false);
+    setError(traducirErrorCamara(lastErr));
   };
 
   const stopCamera = () => {
     streamRef.current?.getTracks().forEach((t) => t.stop());
     streamRef.current = null;
+    if (videoRef.current) videoRef.current.srcObject = null;
     setCameraActive(false);
   };
 
@@ -188,15 +241,43 @@ export const CensoNuevoPage = () => {
     const video = videoRef.current;
     if (!video) return;
 
-    const canvas = document.createElement("canvas");
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-
     try {
+      // Espera a que el video tenga datos y dimensiones reales antes de capturar.
+      // Sin esto, videoWidth/videoHeight pueden ser 0 y toBlob devuelve null ("Sin imagen").
+      if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
+        await new Promise<void>((resolve, reject) => {
+          const timeout = setTimeout(
+            () => reject(new Error("La cámara aún no está lista, intenta de nuevo")),
+            3000,
+          );
+          const onReady = () => {
+            if (video.videoWidth && video.videoHeight) {
+              clearTimeout(timeout);
+              video.removeEventListener("loadeddata", onReady);
+              resolve();
+            }
+          };
+          video.addEventListener("loadeddata", onReady);
+          onReady();
+        });
+      }
+
+      const width = video.videoWidth;
+      const height = video.videoHeight;
+      if (!width || !height) {
+        throw new Error("La cámara no entregó imagen, intenta de nuevo");
+      }
+
+      const canvas = document.createElement("canvas");
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        throw new Error("No se pudo preparar el lienzo de captura");
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+      ctx.drawImage(video, 0, 0, width, height);
+
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvas.toBlob(
           (b) => (b ? resolve(b) : reject(new Error("Sin imagen"))),
