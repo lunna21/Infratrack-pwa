@@ -11,7 +11,7 @@ import {
   LuMapPin,
   LuUsers,
   LuTruck,
-  LuBarChart3,
+  LuChartNoAxesColumn,
   LuActivity,
   LuArrowUpRight,
   LuClock,
@@ -81,7 +81,7 @@ export const DashboardPage = () => {
         { label: "Registrar maquinaria", desc: "Excavadoras, bulldozers, volquetas", icon: LuTruck, path: "/maquinaria/nueva" },
         { label: "Captura de campo", desc: "Foto + GPS + IA Roboflow", icon: LuCamera, path: "/campo/nuevo" },
         { label: "Mapa de obra", desc: "Frentes activos y reportes geo", icon: LuMapPin, path: "/mapa" },
-        { label: "Reportes ejecutivos", desc: "Auditoría, gráficos y PDF", icon: LuBarChart3, path: "/reportes" },
+        { label: "Reportes ejecutivos", desc: "Auditoría, gráficos y PDF", icon: LuChartNoAxesColumn, path: "/reportes" },
       ]
     : [
         { label: "Captura de campo", desc: "Reporta avance del frente", icon: LuCamera, path: "/campo/nuevo" },

@@ -1,12 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
-import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
-import L from "leaflet";
-import "leaflet/dist/leaflet.css";
 import { getCensosApi } from "../services/api";
 import type { CensoDetalle, TipoMaquinaria } from "../types";
 import { TIPO_MAQUINARIA_LABEL } from "../types";
 import { Navbar } from "../components/Navbar";
 import { Button } from "../components/Button";
+import { LeafletCensoMap } from "../components/LeafletCensoMap";
 import { LuMapPin, LuRefreshCw, LuLayers } from "react-icons/lu";
 
 const ICON_COLORS: Record<TipoMaquinaria, string> = {
@@ -16,19 +14,12 @@ const ICON_COLORS: Record<TipoMaquinaria, string> = {
   OTRO: "#64748B",
 };
 
-const buildIcon = (color: string) =>
-  L.divIcon({
-    className: "infratrack-pin",
-    html: `<div style="background:${color}" class="w-7 h-7 rounded-full border-[3px] border-white shadow-lg flex items-center justify-center"><div class="w-2 h-2 rounded-full bg-white"></div></div>`,
-    iconSize: [28, 28],
-    iconAnchor: [14, 14],
-  });
-
 export const MapaPage = () => {
   const [registros, setRegistros] = useState<CensoDetalle[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [filtroTipo, setFiltroTipo] = useState<"TODOS" | TipoMaquinaria>("TODOS");
+  const [activeId, setActiveId] = useState<string | undefined>(undefined);
 
   const load = async () => {
     setLoading(true);
@@ -54,13 +45,6 @@ export const MapaPage = () => {
       ),
     [registros, filtroTipo],
   );
-
-  const center = useMemo<[number, number]>(() => {
-    if (filtered.length === 0) return [4.711, -74.0721];
-    const sumLat = filtered.reduce((s, r) => s + r.lat, 0);
-    const sumLon = filtered.reduce((s, r) => s + r.lon, 0);
-    return [sumLat / filtered.length, sumLon / filtered.length];
-  }, [filtered]);
 
   const counts = useMemo(() => {
     const c: Record<string, number> = { PERRO: 0, GATO: 0, PAJARO: 0, OTRO: 0 };
@@ -132,7 +116,9 @@ export const MapaPage = () => {
                           {label}
                         </span>
                         <span
-                          className={`text-xs font-bold ${isActive ? "text-white/80" : "text-slate-400"}`}
+                          className={`text-xs font-bold ${
+                            isActive ? "text-white/80" : "text-slate-400"
+                          }`}
                         >
                           {count}
                         </span>
@@ -155,39 +141,11 @@ export const MapaPage = () => {
 
             <div className="lg:col-span-3 corp-card overflow-hidden">
               <div className="h-[640px] relative">
-                <MapContainer
-                  center={center}
-                  zoom={filtered.length > 0 ? 12 : 6}
-                  style={{ height: "100%", width: "100%" }}
-                  scrollWheelZoom
-                >
-                  <TileLayer
-                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-                  />
-                  {filtered.map((r) => (
-                    <Marker
-                      key={r.id}
-                      position={[r.lat, r.lon]}
-                      icon={buildIcon(ICON_COLORS[r.mascota.tipo as TipoMaquinaria] ?? "#64748B")}
-                    >
-                      <Popup>
-                        <div className="font-sans">
-                          <div className="font-extrabold text-slate-900">{r.mascota.nombre}</div>
-                          <div className="text-xs font-bold uppercase tracking-wider text-brand-primary mt-0.5">
-                            {TIPO_MAQUINARIA_LABEL[r.mascota.tipo as TipoMaquinaria]}
-                          </div>
-                          <div className="text-xs text-slate-600 mt-2">
-                            <strong>Residente:</strong> {r.dueno.nombres} {r.dueno.apellidos}
-                          </div>
-                          <div className="text-[11px] font-mono text-slate-500 mt-1">
-                            {r.lat.toFixed(5)}, {r.lon.toFixed(5)}
-                          </div>
-                        </div>
-                      </Popup>
-                    </Marker>
-                  ))}
-                </MapContainer>
+                <LeafletCensoMap
+                  censos={filtered}
+                  activeCensoId={activeId}
+                  onCensoSelect={(c) => setActiveId(c.id)}
+                />
               </div>
             </div>
           </div>

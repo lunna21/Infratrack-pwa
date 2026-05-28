@@ -1,7 +1,7 @@
 import { useAuth } from "../context/AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import logo from "../assets/logo.png";
-import { LuLayoutDashboard, LuMapPin, LuCamera, LuUsers, LuTruck, LuBarChart3, LuLogOut, LuMenu, LuX } from "react-icons/lu";
+import { LuLayoutDashboard, LuMapPin, LuCamera, LuUsers, LuTruck, LuChartNoAxesColumn, LuLogOut, LuMenu, LuX } from "react-icons/lu";
 import { useState } from "react";
 
 interface NavItem {
@@ -17,7 +17,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: "Mapa de obra", path: "/mapa", icon: LuMapPin },
   { label: "Personal", path: "/personal", icon: LuUsers, roles: ["GERENTE"] },
   { label: "Maquinaria", path: "/maquinaria", icon: LuTruck, roles: ["GERENTE"] },
-  { label: "Reportes", path: "/reportes", icon: LuBarChart3, roles: ["GERENTE"] },
+  { label: "Reportes", path: "/reportes", icon: LuChartNoAxesColumn, roles: ["GERENTE"] },
 ];
 
 export const Navbar = ({ className }: { className?: string }) => {

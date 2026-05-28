@@ -152,7 +152,7 @@ export const ReportesPage = () => {
 
   return (
     <div className="min-h-screen bg-background pb-20">
-      <Navbar title="Reportes y analítica" subtitle="Indicadores operativos y trazabilidad de campo" />
+      <Navbar />
 
       <main className="mx-auto max-w-6xl px-4 pt-6 sm:px-6">
         <div className="corp-card flex flex-wrap items-center justify-between gap-4 p-5">
