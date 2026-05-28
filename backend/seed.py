@@ -22,6 +22,11 @@ import sys
 import uuid
 import random
 import hashlib
+import base64
+from io import BytesIO
+from pathlib import Path
+
+from PIL import Image
 
 from app.database import Base, engine, SessionLocal
 from app.models.persona import Persona
@@ -39,6 +44,46 @@ COLOR_POR_TIPO = {
     TipoMascota.PAJARO: "#16A34A",  # Volqueta    -> verde
     TipoMascota.OTRO: "#64748B",    # Otro equipo -> gris
 }
+
+# Imagen de ejemplo por tipo de maquinaria (archivos en seed_assets/).
+ASSETS_DIR = Path(__file__).parent / "seed_assets"
+IMAGEN_POR_TIPO = {
+    TipoMascota.PERRO: "excavadora.png",   # Excavadora
+    TipoMascota.GATO: "bulldozer.png",     # Bulldozer
+    TipoMascota.PAJARO: "volqueta.png",    # Volqueta
+    TipoMascota.OTRO: "equipo.png",        # Otro equipo
+}
+
+# Tamaño máximo del base64 almacenado (el campo admite ~50 KB).
+MAX_BASE64_BYTES = 48 * 1024
+
+
+def _data_url_comprimido(ruta: Path) -> str | None:
+    """
+    Carga una imagen, la redimensiona y comprime a JPEG hasta que su
+    representación base64 quede por debajo de MAX_BASE64_BYTES, y devuelve
+    un data URL listo para usarse como `src` de <img> en el mapa.
+    """
+    if not ruta.exists():
+        print(f"  Aviso: no se encontró la imagen {ruta.name}, se omite.")
+        return None
+
+    img = Image.open(ruta).convert("RGB")
+
+    # Probamos combinaciones de ancho y calidad cada vez más agresivas.
+    for ancho in (640, 512, 400, 320):
+        ratio = ancho / img.width
+        redim = img.resize((ancho, max(1, round(img.height * ratio))))
+        for calidad in (75, 65, 55, 45, 35):
+            buf = BytesIO()
+            redim.save(buf, format="JPEG", quality=calidad, optimize=True)
+            b64 = base64.b64encode(buf.getvalue()).decode("ascii")
+            if len(b64) <= MAX_BASE64_BYTES:
+                return f"data:image/jpeg;base64,{b64}"
+
+    # Último recurso: la más pequeña posible.
+    return f"data:image/jpeg;base64,{b64}"
+
 
 # Frentes de obra (proyectos) con su centro geográfico aproximado en Colombia.
 PROYECTOS = [
@@ -116,6 +161,13 @@ def seed(reset: bool = False) -> None:
 
         pwd_hash = _demo_password_hash()
 
+        # Precargamos un data URL comprimido por cada tipo de maquinaria.
+        print("Comprimiendo imágenes de ejemplo...")
+        fotos_por_tipo = {
+            tipo: _data_url_comprimido(ASSETS_DIR / nombre)
+            for tipo, nombre in IMAGEN_POR_TIPO.items()
+        }
+
         # ── Personal ──────────────────────────────────────────
         personas: list[Persona] = []
         for (nombres, apellidos, tipo_doc, doc, direccion, tel, ciudad, usuario) in PERSONAL:
@@ -148,7 +200,7 @@ def seed(reset: bool = False) -> None:
                 tipo=tipo,
                 genero=estado,
                 edad=edad,
-                fotografia=None,
+                fotografia=fotos_por_tipo.get(tipo),
             )
             db.add(m)
             maquinas.append(m)
@@ -166,7 +218,7 @@ def seed(reset: bool = False) -> None:
                     id=uuid.uuid4(),
                     id_mascota=maquina.id,
                     id_dueno=persona.id,
-                    fotografia=None,
+                    fotografia=fotos_por_tipo.get(maquina.tipo),
                     lat=lat,
                     lon=lon,
                     id_proyecto=proyecto["id"],
