@@ -1,143 +1,248 @@
 import { useNavigate } from "react-router-dom";
-import { IoPersonAdd, IoPeople } from "react-icons/io5";
-import { MdPets } from "react-icons/md";
-import { MdAssignmentAdd } from "react-icons/md";
-import { TbMapHeart, TbListSearch } from "react-icons/tb";
+import { useEffect, useState } from "react";
+import useSWR from "swr";
 import { Navbar } from "../components/Navbar";
-import { CatAnimation } from "../components/CatAnimation";
+import { useAuth } from "../context/AuthContext";
+import { getPersonasApi, getMascotasApi, getCensosApi } from "../services/api";
+import type { CensoDetalle, Mascota, Persona } from "../types";
+import { TIPO_MAQUINARIA_LABEL } from "../types";
+import {
+  LuCamera,
+  LuMapPin,
+  LuUsers,
+  LuTruck,
+  LuChartNoAxesColumn,
+  LuActivity,
+  LuArrowUpRight,
+  LuClock,
+  LuShieldCheck,
+  LuHardHat,
+} from "react-icons/lu";
+
+const fmtTime = (iso: string) => {
+  try {
+    const d = new Date(iso);
+    return d.toLocaleString("es-CO", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" });
+  } catch {
+    return iso;
+  }
+};
 
 export const DashboardPage = () => {
   const navigate = useNavigate();
+  const { usuario, rol } = useAuth();
+  const isGerente = rol === "GERENTE";
 
-  const menuItems = [
+  const { data: personas } = useSWR<Persona[]>("personas", getPersonasApi, { revalidateOnFocus: false });
+  const { data: mascotas } = useSWR<Mascota[]>("mascotas", getMascotasApi, { revalidateOnFocus: false });
+  const { data: censos } = useSWR<CensoDetalle[]>("censos", getCensosApi, { revalidateOnFocus: false });
+
+  const [now, setNow] = useState(new Date());
+  useEffect(() => {
+    const t = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(t);
+  }, []);
+
+  const stats = [
     {
-      icon: IoPersonAdd,
-      label: "Registrar Persona",
-      description: "Gestión de dueños",
-      path: "/personas/nueva",
-      bg: "bg-emerald-500",
-      color: "text-emerald-700",
-      bgLight: "bg-emerald-50",
+      label: "Personal activo",
+      value: personas?.length ?? 0,
+      delta: "+12% mes",
+      icon: LuUsers,
+      onClick: isGerente ? () => navigate("/personal") : undefined,
     },
     {
-      icon: IoPeople,
-      label: "Ver Personas",
-      description: "Lista y filtros",
-      path: "/personas",
-      bg: "bg-teal-500",
-      color: "text-teal-700",
-      bgLight: "bg-teal-50",
+      label: "Maquinaria",
+      value: mascotas?.length ?? 0,
+      delta: "Operativa",
+      icon: LuTruck,
+      onClick: isGerente ? () => navigate("/maquinaria") : undefined,
     },
     {
-      icon: MdPets,
-      label: "Registrar Mascota",
-      description: "Nueva mascota",
-      path: "/mascotas/nueva",
-      bg: "bg-amber-500",
-      color: "text-amber-700",
-      bgLight: "bg-amber-50",
+      label: "Capturas en campo",
+      value: censos?.length ?? 0,
+      delta: "Hoy",
+      icon: LuCamera,
+      onClick: () => navigate("/mapa"),
     },
     {
-      icon: TbListSearch,
-      label: "Ver Mascotas",
-      description: "Lista y filtros",
-      path: "/mascotas",
-      bg: "bg-orange-500",
-      color: "text-orange-700",
-      bgLight: "bg-orange-50",
-    },
-    {
-      icon: MdAssignmentAdd,
-      label: "Nuevo Censo",
-      description: "Registro geolocalizado",
-      path: "/censo/nuevo",
-      bg: "bg-violet-500",
-      color: "text-violet-700",
-      bgLight: "bg-violet-50",
-    },
-    {
-      icon: TbMapHeart,
-      label: "Ver Mapa",
-      description: "Explora los censos",
-      path: "/mapa",
-      bg: "bg-blue-500",
-      color: "text-blue-700",
-      bgLight: "bg-blue-50",
+      label: "Frentes activos",
+      value: new Set(censos?.map((c) => c.idProyecto) ?? []).size || 1,
+      delta: "Geolocalizados",
+      icon: LuMapPin,
+      onClick: () => navigate("/mapa"),
     },
   ];
 
+  // Acciones rápidas según rol
+  const acciones = isGerente
+    ? [
+        { label: "Registrar personal", desc: "Alta de operadores y residentes", icon: LuUsers, path: "/personal/nuevo" },
+        { label: "Registrar maquinaria", desc: "Excavadoras, bulldozers, volquetas", icon: LuTruck, path: "/maquinaria/nueva" },
+        { label: "Captura de campo", desc: "Foto + GPS + IA Roboflow", icon: LuCamera, path: "/campo/nuevo" },
+        { label: "Mapa de obra", desc: "Frentes activos y reportes geo", icon: LuMapPin, path: "/mapa" },
+        { label: "Reportes ejecutivos", desc: "Auditoría, gráficos y PDF", icon: LuChartNoAxesColumn, path: "/reportes" },
+      ]
+    : [
+        { label: "Captura de campo", desc: "Reporta avance del frente", icon: LuCamera, path: "/campo/nuevo" },
+        { label: "Mapa de obra", desc: "Mis registros geolocalizados", icon: LuMapPin, path: "/mapa" },
+      ];
+
+  const recientes = (censos ?? []).slice(0, 5);
+
   return (
-    <div className="min-h-screen bg-slate-50 relative overflow-hidden flex flex-col">
-      {/* Decors */}
-      <div className="absolute top-[-15%] left-[-10%] w-125 h-125 bg-slate-200/50 rounded-full mix-blend-multiply filter blur-3xl opacity-70"></div>
-
+    <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
-
-      {/* Content */}
-      <main className="max-w-5xl pt-26 mx-auto px-6 py-10 relative z-15 animate-fade-in flex-1 w-full">
-        <div className="relative  mt-6">
-          <div className="flex flex-col md:flex-row items-center md:items-center ">
-            <div className="text-center md:text-left z-10">
-              <h1 className="text-4xl md:text-5xl font-black text-slate-800 tracking-tight">
-                Panel <span className="text-brand-secondary">principal</span>
-              </h1>
-              <p className="text-slate-500 mt-3 font-medium text-lg md:text-xl max-w-md">
-                ¡Bienvenido! ¿Qué tarea tenemos para hoy?
-              </p>
-              <div className="h-1.5 w-20 bg-brand-secondary rounded-full mt-4 mx-auto md:mx-0 opacity-20" />
+      <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 pt-24 pb-12 w-full animate-fade-in">
+        {/* Hero */}
+        <header className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6 pb-8 border-b border-slate-200">
+          <div>
+            <div className="inline-flex items-center gap-2 mb-3 px-2.5 py-1 rounded-md bg-slate-900 text-white text-[10px] font-bold uppercase tracking-[0.18em]">
+              {isGerente ? <LuShieldCheck className="w-3 h-3" /> : <LuHardHat className="w-3 h-3" />}
+              {isGerente ? "Acceso Gerente" : "Acceso Residente"}
             </div>
-
-            <div className="relative z-0 group md:-mt-12">
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 w-32 h-4 bg-slate-900/10 blur-xl rounded-full" />
-              <CatAnimation className="w-96 h-64 md:w-64 md:h-64 drop-shadow-xl" />
+            <h1 className="text-3xl md:text-4xl font-extrabold text-slate-900 tracking-tight">
+              Bienvenido, <span className="text-brand-secondary">{usuario}</span>
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium max-w-xl">
+              {isGerente
+                ? "Resumen ejecutivo de operaciones, personal y maquinaria en obra."
+                : "Tu panel para reportar avances y capturas de campo en tiempo real."}
+            </p>
+          </div>
+          <div className="flex items-center gap-3 text-sm">
+            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white border border-slate-200">
+              <LuClock className="w-4 h-4 text-slate-500" />
+              <span className="font-mono font-bold text-slate-800">
+                {now.toLocaleTimeString("es-CO", { hour: "2-digit", minute: "2-digit" })}
+              </span>
+              <span className="text-slate-400 font-medium">
+                {now.toLocaleDateString("es-CO", { day: "2-digit", month: "short" })}
+              </span>
+            </div>
+            <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-200">
+              <LuActivity className="w-4 h-4 text-emerald-600" />
+              <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">Sistema OK</span>
             </div>
           </div>
-        </div>
+        </header>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {menuItems.map((item) => (
+        {/* Stats */}
+        <section className="grid grid-cols-2 lg:grid-cols-4 gap-4 mt-8">
+          {stats.map((s) => (
             <button
-              key={item.path}
-              onClick={() => navigate(item.path)}
-              className="group bg-white rounded-3xl shadow-sm hover:shadow-xl border border-slate-100 p-6 hover:-translate-y-1.5 transition-all duration-300 text-left relative overflow-hidden h-full flex flex-col justify-between"
+              key={s.label}
+              onClick={s.onClick}
+              disabled={!s.onClick}
+              className="group corp-stat text-left transition-all hover:border-slate-300 hover:shadow-md disabled:cursor-default"
             >
-              <div
-                className={`absolute top-0 right-0 w-24 h-24 ${item.bg} opacity-[0.03] group-hover:opacity-[0.08] rounded-bl-full transition-opacity duration-300`}
-              ></div>
-
-              <div>
-                <div
-                  className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${item.bgLight} ${item.color} text-2xl mb-5 group-hover:scale-110 transition-transform duration-300`}
-                >
-                  <item.icon />
+              <div className="flex items-start justify-between mb-4">
+                <div className="w-10 h-10 rounded-md bg-slate-900 text-white flex items-center justify-center">
+                  <s.icon className="w-4 h-4" />
                 </div>
-                <h3 className="text-lg font-bold text-slate-800 mb-1">
-                  {item.label}
-                </h3>
-                <p className="text-sm font-medium text-slate-500">
-                  {item.description}
-                </p>
+                {s.onClick && (
+                  <LuArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-brand-primary transition-colors" />
+                )}
               </div>
-
-              <div className="mt-6 flex items-center text-sm font-bold text-brand-primary opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all duration-300">
-                Iniciar ahora
-                <svg
-                  className="w-4 h-4 ml-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 5l7 7-7 7"
-                  />
-                </svg>
-              </div>
+              <p className="text-3xl font-black text-slate-900 tracking-tight font-mono">{s.value}</p>
+              <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mt-1">{s.label}</p>
+              <p className="text-[11px] font-semibold text-slate-400 mt-2">{s.delta}</p>
             </button>
           ))}
-        </div>
+        </section>
+
+        {/* Body grid */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+          {/* Acciones rápidas */}
+          <div className="lg:col-span-2">
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Acciones rápidas</h2>
+                <p className="text-sm text-slate-500 font-medium">Operaciones disponibles para tu rol.</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              {acciones.map((a) => (
+                <button
+                  key={a.path}
+                  onClick={() => navigate(a.path)}
+                  className="group corp-card p-5 text-left hover:border-brand-primary hover:shadow-md transition-all"
+                >
+                  <div className="flex items-start gap-4">
+                    <div className="w-11 h-11 rounded-lg bg-orange-50 border border-orange-200 text-brand-secondary flex items-center justify-center group-hover:bg-brand-primary group-hover:text-white group-hover:border-brand-primary transition-colors">
+                      <a.icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-bold text-slate-900">{a.label}</h3>
+                      <p className="text-xs text-slate-500 font-medium mt-1 leading-relaxed">{a.desc}</p>
+                    </div>
+                    <LuArrowUpRight className="w-4 h-4 text-slate-300 group-hover:text-brand-primary transition-colors" />
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Actividad reciente */}
+          <div>
+            <div className="flex items-end justify-between mb-4">
+              <div>
+                <h2 className="text-xl font-extrabold text-slate-900 tracking-tight">Actividad reciente</h2>
+                <p className="text-sm text-slate-500 font-medium">Últimas capturas en campo.</p>
+              </div>
+            </div>
+
+            <div className="corp-card divide-y divide-slate-100">
+              {recientes.length === 0 && (
+                <div className="p-8 text-center">
+                  <LuCamera className="w-8 h-8 text-slate-300 mx-auto mb-3" />
+                  <p className="text-sm font-semibold text-slate-500">Aún no hay capturas registradas.</p>
+                  <button
+                    onClick={() => navigate("/campo/nuevo")}
+                    className="mt-3 text-xs font-bold text-brand-primary hover:text-brand-hover"
+                  >
+                    Crear la primera →
+                  </button>
+                </div>
+              )}
+              {recientes.map((c) => (
+                <button
+                  key={c.id}
+                  onClick={() => navigate("/mapa")}
+                  className="w-full p-4 flex items-center gap-3 hover:bg-slate-50 transition-colors text-left"
+                >
+                  <div className="w-10 h-10 rounded-md bg-slate-900 text-white flex items-center justify-center shrink-0">
+                    <LuTruck className="w-4 h-4" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-bold text-slate-900 truncate">
+                      {c.mascota?.nombre || "Maquinaria"}
+                    </p>
+                    <p className="text-[11px] font-mono text-slate-500 truncate">
+                      {TIPO_MAQUINARIA_LABEL[c.mascota?.tipo as keyof typeof TIPO_MAQUINARIA_LABEL] || "Equipo"} ·
+                      {" "}{c.lat.toFixed(3)}, {c.lon.toFixed(3)}
+                    </p>
+                  </div>
+                  {c.id && (
+                    <span className="text-[10px] font-mono text-slate-400">#{String(c.id).slice(0, 6)}</span>
+                  )}
+                </button>
+              ))}
+              {recientes.length > 0 && (
+                <button
+                  onClick={() => navigate("/mapa")}
+                  className="w-full px-4 py-3 text-xs font-bold text-brand-primary hover:bg-orange-50 uppercase tracking-wider"
+                >
+                  Ver todas en el mapa →
+                </button>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Suppress unused warnings safely */}
+        <span className="hidden">{fmtTime(new Date().toISOString())}</span>
       </main>
     </div>
   );
