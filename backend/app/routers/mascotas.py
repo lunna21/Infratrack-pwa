@@ -9,6 +9,8 @@ from sqlalchemy.orm import Session
 
 from ..dependencies import get_db, get_current_user
 from ..models.mascota import Mascota
+import json
+
 from ..schemas.mascota import MascotaCreate, MascotaResponse
 
 router = APIRouter(prefix="/mascotas", tags=["Mascotas"])
@@ -41,6 +43,8 @@ def crear_mascota(
         "tipo": body.tipo,
         "genero": body.genero,
         "edad": body.edad,
+        "horas_uso": body.horas_uso,
+        "historial": json.dumps(body.historial) if body.historial else None,
         "fotografia": body.fotografia,
     }
     if body.id is not None:

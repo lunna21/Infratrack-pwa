@@ -3,11 +3,18 @@ Schemas Pydantic: Mascota.
 """
 
 import base64
+import json
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, field_validator
 from ..models.mascota import TipoMascota
 
 MAX_FOTO_BYTES = 50 * 1024  # 50 KB
+
+
+class HistorialEvento(BaseModel):
+    fecha: str
+    estado: str
+    nota: str | None = None
 
 
 class MascotaCreate(BaseModel):
@@ -17,6 +24,8 @@ class MascotaCreate(BaseModel):
     tipo: TipoMascota
     genero: str
     edad: float
+    horas_uso: float = 0
+    historial: list[HistorialEvento] | None = None
     fotografia: str | None = None
 
     @field_validator("fotografia")
@@ -42,6 +51,13 @@ class MascotaCreate(BaseModel):
             )
         return v
 
+    @field_validator("horas_uso")
+    @classmethod
+    def validar_horas_uso(cls, v: float) -> float:
+        if v < 0:
+            raise ValueError("Las horas de uso no pueden ser negativas.")
+        return v
+
 
 class MascotaResponse(BaseModel):
     """DTO de respuesta para mascota."""
@@ -50,6 +66,20 @@ class MascotaResponse(BaseModel):
     tipo: TipoMascota
     genero: str
     edad: float
+    horas_uso: float = 0
+    historial: list[HistorialEvento] | None = None
     fotografia: str | None = None
+
+    @field_validator("historial", mode="before")
+    @classmethod
+    def parsear_historial(cls, v: str | list[dict] | None):
+        if v is None:
+            return None
+        if isinstance(v, list):
+            return v
+        try:
+            return json.loads(v)
+        except Exception:
+            return None
 
     model_config = ConfigDict(from_attributes=True)

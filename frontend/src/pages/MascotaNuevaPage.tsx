@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { crearMascotaApi } from "../services/api";
 import { TIPO_MAQUINARIA_LABEL } from "../types";
-import type { TipoMaquinaria } from "../types";
+import type { HistorialEvento, TipoMaquinaria } from "../types";
 import { FormInput } from "../components/FormInput";
 import { FormSelect } from "../components/FormSelect";
 import { Navbar } from "../components/Navbar";
@@ -31,6 +31,8 @@ export const MascotaNuevaPage = () => {
     tipo: "PERRO" as TipoMaquinaria,
     genero: "MACHO",
     edad: 1,
+    horas_uso: 0,
+    historial: [] as HistorialEvento[],
     fotografia: "",
   });
 
@@ -53,7 +55,11 @@ export const MascotaNuevaPage = () => {
     if (!form.nombre) return setError("El nombre/placa del equipo es obligatorio");
     setLoading(true);
     try {
-      await crearMascotaApi({ ...form, edad: Number(form.edad) });
+      await crearMascotaApi({
+        ...form,
+        edad: Number(form.edad),
+        horas_uso: Number(form.horas_uso),
+      });
       setSuccess(true);
       setTimeout(() => navigate("/maquinaria"), 1500);
     } catch (err: unknown) {
@@ -134,6 +140,88 @@ export const MascotaNuevaPage = () => {
                 value={form.edad}
                 onChange={(e) => set("edad", Number(e.target.value))}
               />
+              <FormInput
+                label="Horas de uso"
+                type="number"
+                min={0}
+                value={form.horas_uso}
+                onChange={(e) => set("horas_uso", Number(e.target.value))}
+              />
+            </div>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                  Historial operativo
+                </h3>
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() =>
+                    set("historial", [
+                      ...form.historial,
+                      { fecha: new Date().toISOString().slice(0, 10), estado: "Operativa", nota: "" },
+                    ])
+                  }
+                >
+                  Agregar evento
+                </Button>
+              </div>
+              {form.historial.length === 0 && (
+                <p className="text-xs text-slate-500 font-medium">
+                  No hay eventos registrados.
+                </p>
+              )}
+              {form.historial.map((evento, idx) => (
+                <div key={idx} className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <FormInput
+                    label="Fecha"
+                    type="date"
+                    value={evento.fecha}
+                    onChange={(e) => {
+                      const next = [...form.historial];
+                      next[idx] = { ...next[idx], fecha: e.target.value };
+                      set("historial", next);
+                    }}
+                  />
+                  <FormSelect
+                    label="Estado"
+                    value={evento.estado}
+                    onChange={(e) => {
+                      const next = [...form.historial];
+                      next[idx] = { ...next[idx], estado: e.target.value };
+                      set("historial", next);
+                    }}
+                    options={[
+                      { value: "Operativa", label: "Operativa" },
+                      { value: "Mantenimiento", label: "Mantenimiento" },
+                    ]}
+                  />
+                  <FormInput
+                    label="Nota"
+                    value={evento.nota ?? ""}
+                    onChange={(e) => {
+                      const next = [...form.historial];
+                      next[idx] = { ...next[idx], nota: e.target.value };
+                      set("historial", next);
+                    }}
+                  />
+                  <div className="flex items-end">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        set(
+                          "historial",
+                          form.historial.filter((_, i) => i !== idx),
+                        )
+                      }
+                    >
+                      Quitar
+                    </Button>
+                  </div>
+                </div>
+              ))}
             </div>
 
             <div>

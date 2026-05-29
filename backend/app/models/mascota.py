@@ -30,6 +30,8 @@ class Mascota(Base):
     tipo = Column(Enum(TipoMascota), nullable=False)
     genero = Column(String(20), nullable=False)
     edad = Column(Float, nullable=False)
+    horas_uso = Column(Float, nullable=False, default=0)
+    historial = Column(Text, nullable=True)
     fotografia = Column(Text, nullable=True)
 
     # Relación inversa con Censo

@@ -84,6 +84,7 @@ class MascotaEnCenso(BaseModel):
     nombre: str
     tipo: str
     edad: float
+    horas_uso: float | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

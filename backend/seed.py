@@ -23,6 +23,8 @@ import uuid
 import random
 import hashlib
 import base64
+import json
+from datetime import datetime, timedelta
 from io import BytesIO
 from pathlib import Path
 
@@ -114,19 +116,19 @@ PERSONAL = [
 ]
 
 MAQUINARIA = [
-    # nombre, tipo, estado(genero), edad(años)
-    ("CAT 320 GC", TipoMascota.PERRO, "OPERATIVA", 3.0),
-    ("Komatsu PC210", TipoMascota.PERRO, "OPERATIVA", 5.0),
-    ("Hyundai R220", TipoMascota.PERRO, "MANTENIMIENTO", 7.0),
-    ("CAT D6", TipoMascota.GATO, "OPERATIVA", 4.0),
-    ("Komatsu D65", TipoMascota.GATO, "OPERATIVA", 6.0),
-    ("John Deere 850K", TipoMascota.GATO, "MANTENIMIENTO", 8.0),
-    ("Volvo FMX 440", TipoMascota.PAJARO, "OPERATIVA", 2.0),
-    ("Kenworth T800", TipoMascota.PAJARO, "OPERATIVA", 5.0),
-    ("Mack Granite", TipoMascota.PAJARO, "OPERATIVA", 6.0),
-    ("Compactador CAT CS54", TipoMascota.OTRO, "OPERATIVA", 3.0),
-    ("Motoniveladora CAT 120", TipoMascota.OTRO, "MANTENIMIENTO", 9.0),
-    ("Grúa Liebherr LTM", TipoMascota.OTRO, "OPERATIVA", 4.0),
+    # nombre, tipo, estado(genero), edad(años), horas_uso
+    ("CAT 320 GC", TipoMascota.PERRO, "OPERATIVA", 3.0, 1250.0),
+    ("Komatsu PC210", TipoMascota.PERRO, "OPERATIVA", 5.0, 2100.0),
+    ("Hyundai R220", TipoMascota.PERRO, "MANTENIMIENTO", 7.0, 3650.0),
+    ("CAT D6", TipoMascota.GATO, "OPERATIVA", 4.0, 1950.0),
+    ("Komatsu D65", TipoMascota.GATO, "OPERATIVA", 6.0, 3100.0),
+    ("John Deere 850K", TipoMascota.GATO, "MANTENIMIENTO", 8.0, 4200.0),
+    ("Volvo FMX 440", TipoMascota.PAJARO, "OPERATIVA", 2.0, 980.0),
+    ("Kenworth T800", TipoMascota.PAJARO, "OPERATIVA", 5.0, 2600.0),
+    ("Mack Granite", TipoMascota.PAJARO, "OPERATIVA", 6.0, 2950.0),
+    ("Compactador CAT CS54", TipoMascota.OTRO, "OPERATIVA", 3.0, 1400.0),
+    ("Motoniveladora CAT 120", TipoMascota.OTRO, "MANTENIMIENTO", 9.0, 5100.0),
+    ("Grúa Liebherr LTM", TipoMascota.OTRO, "OPERATIVA", 4.0, 1750.0),
 ]
 
 
@@ -137,6 +139,24 @@ def _coord_cercana(centro: tuple[float, float]) -> tuple[float, float]:
         round(lat + random.uniform(-0.012, 0.012), 6),
         round(lon + random.uniform(-0.012, 0.012), 6),
     )
+
+
+def _fake_historial() -> list[dict]:
+    """Genera eventos falsos de estado operativo/mantenimiento."""
+    eventos = []
+    base = datetime.utcnow().date()
+    estados = ["Operativa", "Mantenimiento"]
+    notas = [
+        "Cambio de aceite", "Revision de frenos", "Operacion continua", "Parada preventiva",
+        "Chequeo hidraulico", "Ajuste de orugas",
+    ]
+    dias = sorted(random.sample(range(7, 120), k=4))
+    for offset in dias:
+        fecha = (base - timedelta(days=offset)).isoformat()
+        estado = random.choice(estados)
+        nota = random.choice(notas)
+        eventos.append({"fecha": fecha, "estado": estado, "nota": nota})
+    return eventos
 
 
 def seed(reset: bool = False) -> None:
@@ -193,13 +213,16 @@ def seed(reset: bool = False) -> None:
 
         # ── Maquinaria ────────────────────────────────────────
         maquinas: list[Mascota] = []
-        for (nombre, tipo, estado, edad) in MAQUINARIA:
+        for (nombre, tipo, estado, edad, horas_uso) in MAQUINARIA:
+            historial = _fake_historial()
             m = Mascota(
                 id=uuid.uuid4(),
                 nombre=nombre,
                 tipo=tipo,
                 genero=estado,
                 edad=edad,
+                horas_uso=horas_uso,
+                historial=json.dumps(historial),
                 fotografia=fotos_por_tipo.get(tipo),
             )
             db.add(m)

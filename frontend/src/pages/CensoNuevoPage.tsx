@@ -46,6 +46,7 @@ export const CensoNuevoPage = () => {
 
   // Roboflow
   const [analyzing, setAnalyzing] = useState(false);
+  const [analysisDone, setAnalysisDone] = useState(false);
   const [detecciones, setDetecciones] = useState<DeteccionMaquinaria[]>([]);
   const [topDeteccion, setTopDeteccion] = useState<DeteccionMaquinaria | null>(
     null,
@@ -245,6 +246,7 @@ export const CensoNuevoPage = () => {
 
   const runRoboflow = async (dataUrl: string) => {
     setAnalyzing(true);
+    setAnalysisDone(false);
     setDetecciones([]);
     setTopDeteccion(null);
     try {
@@ -265,6 +267,7 @@ export const CensoNuevoPage = () => {
       );
     } finally {
       setAnalyzing(false);
+      setAnalysisDone(true);
     }
   };
 
@@ -654,7 +657,7 @@ export const CensoNuevoPage = () => {
                     </div>
                   )}
 
-                  {!analyzing && detecciones.length === 0 && (
+                  {!analyzing && analysisDone && detecciones.length === 0 && (
                     <p className="text-xs text-slate-400 font-medium">
                       No se detectó maquinaria. Selecciona el equipo
                       manualmente.

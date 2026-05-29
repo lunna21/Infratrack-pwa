@@ -46,6 +46,12 @@ export const ROBOFLOW_TO_TIPO: Record<string, TipoMaquinaria> = {
   dumptruck: 'PAJARO'
 };
 
+export interface HistorialEvento {
+  fecha: string;
+  estado: string;
+  nota?: string | null;
+}
+
 export interface Mascota {
   id: string;
   nombre: string;
@@ -54,6 +60,8 @@ export interface Mascota {
   genero: string;
   /** Años de antigüedad / horas (escala) */
   edad: number;
+  horas_uso: number;
+  historial?: HistorialEvento[] | null;
   fotografia: string;
 }
 
