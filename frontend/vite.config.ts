@@ -14,7 +14,9 @@ export default defineConfig({
         enabled: true,
       },
       includeAssets: [
-        'manifest.json',
+        'favicon.ico',
+        'favicon-96x96.png',
+        'icons/apple-touch-icon.png',
         'icons/web-app-manifest-192x192.png',
         'icons/icon512_maskable.png',
         'icons/icon512_rounded.png',
@@ -58,13 +60,6 @@ export default defineConfig({
         navigateFallback: '/index.html',
         globPatterns: ['**/*.{js,css,html,ico,png,svg,json,webmanifest,wasm}'],
         runtimeCaching: [
-          {
-            urlPattern: ({ url }) => url.pathname === '/manifest.json',
-            handler: 'CacheFirst',
-            options: {
-              cacheName: 'manifest-cache',
-            },
-          },
           {
             urlPattern: ({ url }) => url.origin === 'https://fonts.googleapis.com',
             handler: 'StaleWhileRevalidate',

@@ -1,5 +1,5 @@
 {
-  "name": "censo-mascotas-pwa",
+  "name": "infratrack-pwa",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "generate:icons": "node scripts/generate-icons.mjs"
   },
   "dependencies": {
     "@lottiefiles/dotlottie-react": "^0.19.2",
@@ -46,6 +47,7 @@
     "eslint-plugin-react-refresh": "^0.5.2",
     "globals": "^17.5.0",
     "postcss": "^8.5.12",
+    "sharp": "^0.34.5",
     "tailwindcss": "^4.2.4",
     "typescript": "~6.0.2",
     "typescript-eslint": "^8.58.2",
