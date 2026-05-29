@@ -2,6 +2,7 @@ import { useEffect, useRef } from "react";
 import * as L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import type { CensoDetalle } from "../types";
+import { TIPO_MAQUINARIA_LABEL } from "../types";
 
 type Point = {
   lat: number;
@@ -68,7 +69,7 @@ const getPopupContent = (censo: CensoDetalle) => {
           <div style="font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:#64748b;font-weight:700;">Registro de campo</div>
           <div style="font-size:16px;font-weight:800;color:#0f172a;line-height:1.15;">${escapeHtml(censo.mascota.nombre)}</div>
         </div>
-        <span style="padding:6px 10px;border-radius:6px;background:${escapeHtml(censo.color)}22;color:#0f172a;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">${escapeHtml(censo.mascota.tipo)}</span>
+        <span style="padding:6px 10px;border-radius:6px;background:${escapeHtml(censo.color)}22;color:#0f172a;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;">${escapeHtml(TIPO_MAQUINARIA_LABEL[censo.mascota.tipo] || censo.mascota.tipo)}</span>
       </div>
       <div style="display:grid;gap:6px;color:#334155;font-size:13px;line-height:1.35;">
         <div><strong>Responsable:</strong> ${escapeHtml(`${censo.dueno.nombres} ${censo.dueno.apellidos}`.trim())}</div>
@@ -102,7 +103,8 @@ export const LeafletCensoMap = ({
     }).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      attribution:
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
     }).addTo(map);
 
     const layerGroup = L.layerGroup().addTo(map);
@@ -177,9 +179,12 @@ export const LeafletCensoMap = ({
     }
 
     if (!focusMarkerRef.current) {
-      focusMarkerRef.current = L.marker([focusLocation.lat, focusLocation.lng], {
-        icon: createUserIcon(),
-      }).addTo(map);
+      focusMarkerRef.current = L.marker(
+        [focusLocation.lat, focusLocation.lng],
+        {
+          icon: createUserIcon(),
+        },
+      ).addTo(map);
     } else {
       focusMarkerRef.current.setLatLng([focusLocation.lat, focusLocation.lng]);
     }

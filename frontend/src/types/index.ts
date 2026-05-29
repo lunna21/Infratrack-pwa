@@ -35,8 +35,15 @@ export const TIPO_MAQUINARIA_LABEL: Record<TipoMaquinaria, string> = {
 
 export const ROBOFLOW_TO_TIPO: Record<string, TipoMaquinaria> = {
   Excavator: 'PERRO',
+  excavator: 'PERRO',
+  excavators: 'PERRO',
+  EXCAVATORS: 'PERRO',
   Bull_dozer: 'GATO',
+  bull_dozer: 'GATO',
+  bulldozer: 'GATO',
   Dumb_truck: 'PAJARO',
+  dumb_truck: 'PAJARO',
+  dumptruck: 'PAJARO'
 };
 
 export interface Mascota {
