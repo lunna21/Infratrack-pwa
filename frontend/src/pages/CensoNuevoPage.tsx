@@ -20,7 +20,6 @@ import {
   LuCheck,
   LuTriangleAlert,
   LuScan,
-  LuTruck,
   LuCircleX,
 } from "react-icons/lu";
 
