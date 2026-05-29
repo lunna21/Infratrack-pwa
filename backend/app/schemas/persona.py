@@ -15,7 +15,7 @@ def _to_camel(string: str) -> str:
 
 class PersonaCreate(BaseModel):
     """DTO para crear una persona (acepta camelCase del frontend)."""
-    id: UUID | None = None
+    id: UUID
     nombres: str
     apellidos: str
     tipo_documento: str
