@@ -62,7 +62,7 @@ export interface Mascota {
   edad: number;
   horas_uso: number;
   historial?: HistorialEvento[] | null;
-  fotografia: string;
+  fotografia: string | null;
 }
 
 /**

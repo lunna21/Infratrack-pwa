@@ -19,6 +19,58 @@ const ESTADOS = [
   { value: "HEMBRA", label: "En mantenimiento" },
 ];
 
+// El backend rechaza fotos cuyo Base64 decodificado supere 50 KB (422).
+// Comprimimos/redimensionamos en el cliente para mantenernos por debajo del límite.
+const MAX_FOTO_BYTES = 50 * 1024;
+
+const base64Bytes = (dataUrl: string): number => {
+  const comma = dataUrl.indexOf(",");
+  const b64 = comma >= 0 ? dataUrl.slice(comma + 1) : dataUrl;
+  const padding = b64.endsWith("==") ? 2 : b64.endsWith("=") ? 1 : 0;
+  return Math.floor((b64.length * 3) / 4) - padding;
+};
+
+const comprimirImagen = (file: File): Promise<string> =>
+  new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("No se pudo leer la imagen"));
+    reader.onload = () => {
+      const img = new Image();
+      img.crossOrigin = "anonymous";
+      img.onerror = () => reject(new Error("Imagen inválida"));
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("No se pudo procesar la imagen"));
+
+        // Reducimos progresivamente dimensiones y calidad hasta cumplir el límite.
+        let maxDim = 800;
+        for (let attempt = 0; attempt < 8; attempt++) {
+          const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          ctx.clearRect(0, 0, canvas.width, canvas.height);
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+          let quality = 0.8;
+          let dataUrl = canvas.toDataURL("image/jpeg", quality);
+          while (base64Bytes(dataUrl) > MAX_FOTO_BYTES && quality > 0.3) {
+            quality -= 0.1;
+            dataUrl = canvas.toDataURL("image/jpeg", quality);
+          }
+
+          if (base64Bytes(dataUrl) <= MAX_FOTO_BYTES) {
+            return resolve(dataUrl);
+          }
+          maxDim = Math.round(maxDim * 0.75);
+        }
+        reject(new Error("No se pudo comprimir la imagen por debajo de 50 KB"));
+      };
+      img.src = String(reader.result ?? "");
+    };
+    reader.readAsDataURL(file);
+  });
+
 export const MascotaNuevaPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -39,14 +91,15 @@ export const MascotaNuevaPage = () => {
   const set = <K extends keyof typeof form>(field: K, value: (typeof form)[K]) =>
     setForm((f) => ({ ...f, [field]: value }));
 
-  const handleFile = (file: File) => {
-    const reader = new FileReader();
-    reader.onload = () => {
-      const dataUrl = String(reader.result ?? "");
+  const handleFile = async (file: File) => {
+    setError("");
+    try {
+      const dataUrl = await comprimirImagen(file);
       setPreview(dataUrl);
       set("fotografia", dataUrl);
-    };
-    reader.readAsDataURL(file);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "No se pudo procesar la imagen");
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -59,6 +112,7 @@ export const MascotaNuevaPage = () => {
         ...form,
         edad: Number(form.edad),
         horas_uso: Number(form.horas_uso),
+        fotografia: form.fotografia || null,
       });
       setSuccess(true);
       setTimeout(() => navigate("/maquinaria"), 1500);

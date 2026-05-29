@@ -67,7 +67,7 @@ if (!self.define) {
     });
   };
 }
-define(['./workbox-b68364bb'], (function (workbox) { 'use strict';
+define(['./workbox-f8ba3ea9'], (function (workbox) { 'use strict';
 
   self.skipWaiting();
   workbox.clientsClaim();
@@ -78,18 +78,12 @@ define(['./workbox-b68364bb'], (function (workbox) { 'use strict';
    */
   workbox.precacheAndRoute([{
     "url": "/index.html",
-    "revision": "0.g1s4c8vunp"
+    "revision": "0.4hucel38crc"
   }], {});
   workbox.cleanupOutdatedCaches();
   workbox.registerRoute(new workbox.NavigationRoute(workbox.createHandlerBoundToURL("/index.html"), {
     allowlist: [/^\/$/]
   }));
-  workbox.registerRoute(({
-    url
-  }) => url.pathname === "/manifest.json", new workbox.CacheFirst({
-    "cacheName": "manifest-cache",
-    plugins: []
-  }), 'GET');
   workbox.registerRoute(({
     url
   }) => url.origin === "https://fonts.googleapis.com", new workbox.StaleWhileRevalidate({
