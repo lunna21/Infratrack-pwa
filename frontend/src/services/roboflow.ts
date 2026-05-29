@@ -39,12 +39,19 @@ interface RoboflowOutputBlock {
 }
 
 const extraerPredicciones = (raw: unknown): RoboflowPrediction[] => {
-  // Estructura típica: { outputs: [ { predictions: { predictions: [...] } } ] }
-  const out: RoboflowPrediction[] = [];
-  const root = raw as { outputs?: RoboflowOutputBlock[] };
-  if (!root?.outputs) return out;
+  // Para el modelo Hosted API (detect.roboflow.com),
+  // las predicciones vienen directamente en un arreglo en la raíz `raw.predictions`
+  const root = raw as { predictions?: RoboflowPrediction[] };
+  if (root?.predictions && Array.isArray(root.predictions)) {
+    return root.predictions;
+  }
 
-  for (const block of root.outputs) {
+  // Fallback a la lógica de workflows antigua
+  const out: RoboflowPrediction[] = [];
+  const rootWorkflows = raw as { outputs?: RoboflowOutputBlock[] };
+  if (!rootWorkflows?.outputs) return out;
+
+  for (const block of rootWorkflows.outputs) {
     const preds = block?.predictions;
     if (!preds) continue;
     if (Array.isArray(preds)) {
